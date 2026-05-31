@@ -71,7 +71,6 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 .stat-label{font-size:10px;color:#888;margin-top:3px}
 .section-title{font-size:11px;font-weight:600;color:#888;letter-spacing:1px;margin-bottom:10px;text-transform:uppercase}
 
-/* PEDIDOS */
 .pedido-card{background:#fff;border-radius:16px;border:1px solid #FFE8DC;margin-bottom:12px;overflow:hidden}
 .pedido-head{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #FFE8DC}
 .pedido-num{font-size:12px;font-weight:700;color:#FF4D00}
@@ -88,7 +87,6 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 .btn-confirmar{padding:10px 18px;border-radius:20px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:#FF4D00;color:#fff}
 .btn-listo{padding:10px 18px;border-radius:20px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:#2D6A2D;color:#fff}
 
-/* MENU */
 .menu-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .cat-label{font-size:11px;font-weight:700;color:#FF4D00;letter-spacing:1px;text-transform:uppercase;margin:16px 0 8px}
 .btn-nueva-cat{padding:7px 14px;border-radius:20px;background:#FFF4EF;color:#FF4D00;border:1px solid #FFE8DC;font-size:12px;font-weight:600;cursor:pointer}
@@ -114,13 +112,11 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 .btn-sm-rojo{background:#FFF0F0;color:#E24B4A}
 .btn-add-prod{width:100%;padding:14px;background:#FFF4EF;color:#FF4D00;border:1.5px dashed #FF4D00;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;margin-bottom:16px}
 
-/* INFO LOCAL */
 .info-card{background:#fff;border-radius:14px;border:1px solid #FFE8DC;padding:16px;margin-bottom:10px}
 .info-label{font-size:11px;color:#888;margin-bottom:6px}
 .info-val{font-size:15px;font-weight:600;color:#1A1A1A}
 .version{font-size:10px;color:#ccc;text-align:center;padding:8px 0}
 
-/* MODALES */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;z-index:100}
 .modal{background:#fff;border-radius:24px 24px 0 0;padding:24px 20px;width:100%;max-height:90vh;overflow-y:auto}
 .modal-title{font-size:18px;font-weight:700;color:#1A1A1A;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between}
@@ -156,33 +152,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
   </div>
   <div class="restos-body">
     <div class="restos-label">Nuestros restaurantes</div>
-    <div class="resto-btn" onclick="seleccionarResto('El Bodegón NKT','🦞','Mariscos · Pizzas · Sándwiches',true)">
-      <div class="resto-btn-emoji">🦞</div>
-      <div class="resto-btn-info">
-        <div class="resto-btn-nombre">El Bodegón NKT</div>
-        <div class="resto-btn-cat">Mariscos · Pizzas · Sándwiches</div>
-        <span class="badge-abierto">Abierto</span>
-      </div>
-      <div class="resto-btn-arrow">›</div>
-    </div>
-    <div class="resto-btn" onclick="seleccionarResto('Colantonio\'s','🍕','Pizza napolitana · Empanadas',true)">
-      <div class="resto-btn-emoji">🍕</div>
-      <div class="resto-btn-info">
-        <div class="resto-btn-nombre">Colantonio's</div>
-        <div class="resto-btn-cat">Pizza napolitana · Empanadas</div>
-        <span class="badge-abierto">Abierto</span>
-      </div>
-      <div class="resto-btn-arrow">›</div>
-    </div>
-    <div class="resto-btn" onclick="seleccionarResto('Kusama Sushi','🍣','Sushi · Mariscos',false)">
-      <div class="resto-btn-emoji">🍣</div>
-      <div class="resto-btn-info">
-        <div class="resto-btn-nombre">Kusama Sushi</div>
-        <div class="resto-btn-cat">Sushi · Mariscos</div>
-        <span class="badge-cerrado">Cerrado</span>
-      </div>
-      <div class="resto-btn-arrow">›</div>
-    </div>
+    <div id="lista-restos"><div class="loading-text">Cargando restaurantes...</div></div>
     <div class="version">ALL App Restaurante v1.2</div>
   </div>
 </div>
@@ -284,7 +254,6 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     <div id="msg-prod-ok" class="msg-ok"></div>
     <div id="msg-prod-err" class="msg-err"></div>
 
-    <!-- FOTO -->
     <div class="field-label">Foto del producto</div>
     <img id="foto-preview" class="foto-preview" src="" alt="Preview"/>
     <div class="foto-placeholder" onclick="document.getElementById('foto-input').click()">
@@ -304,7 +273,6 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     <div class="field-label">Precio</div>
     <input type="number" id="prod-precio" placeholder="Ej: 5900" class="input"/>
 
-    <!-- PROMOCIÓN -->
     <div class="promo-section">
       <div class="promo-toggle">
         <span class="promo-toggle-label">🏷 Agregar promoción</span>
@@ -349,19 +317,72 @@ var promoActiva = false
 var restauranteId = null
 var editandoProducto = null
 
-// Verificar sesión
+// ─── CARGAR LISTA DE RESTAURANTES DESDE SUPABASE ───────────────────────────
+async function cargarListaRestos(){
+  var lista = document.getElementById('lista-restos')
+  var result = await sb.from('restaurantes').select('id,nombre,categoria,abierto').order('nombre')
+  if(result.error || !result.data || !result.data.length){
+    // fallback hardcodeado
+    lista.innerHTML = renderRestoBtnHardcoded()
+    return
+  }
+  var html = ''
+  var emojis = { 'El Bodegón NKT':'🦞', "Colantonio's":'🍕', 'Kusama Sushi':'🍣' }
+  result.data.forEach(function(r){
+    var emoji = emojis[r.nombre] || '🍽'
+    var estaAbierto = r.abierto !== false
+    html += '<div class="resto-btn" onclick="seleccionarResto(\''+r.nombre.replace(/'/g,"\\'")+'\',' +
+      '\''+emoji+'\',\''+( r.categoria||'' ).replace(/'/g,"\\'")+'\','+estaAbierto+',\''+r.id+'\')">'
+    html += '<div class="resto-btn-emoji">'+emoji+'</div>'
+    html += '<div class="resto-btn-info">'
+    html += '<div class="resto-btn-nombre">'+r.nombre+'</div>'
+    html += '<div class="resto-btn-cat">'+(r.categoria||'')+'</div>'
+    html += estaAbierto
+      ? '<span class="badge-abierto">Abierto</span>'
+      : '<span class="badge-cerrado">Cerrado</span>'
+    html += '</div><div class="resto-btn-arrow">›</div></div>'
+  })
+  lista.innerHTML = html
+}
+
+function renderRestoBtnHardcoded(){
+  return `
+    <div class="resto-btn" onclick="seleccionarResto('El Bodegón NKT','🦞','Mariscos · Pizzas · Sándwiches',true,null)">
+      <div class="resto-btn-emoji">🦞</div>
+      <div class="resto-btn-info"><div class="resto-btn-nombre">El Bodegón NKT</div><div class="resto-btn-cat">Mariscos · Pizzas · Sándwiches</div><span class="badge-abierto">Abierto</span></div>
+      <div class="resto-btn-arrow">›</div>
+    </div>
+    <div class="resto-btn" onclick="seleccionarResto('Colantonio\\'s','🍕','Pizza napolitana · Empanadas',true,null)">
+      <div class="resto-btn-emoji">🍕</div>
+      <div class="resto-btn-info"><div class="resto-btn-nombre">Colantonio's</div><div class="resto-btn-cat">Pizza napolitana · Empanadas</div><span class="badge-abierto">Abierto</span></div>
+      <div class="resto-btn-arrow">›</div>
+    </div>
+    <div class="resto-btn" onclick="seleccionarResto('Kusama Sushi','🍣','Sushi · Mariscos',false,null)">
+      <div class="resto-btn-emoji">🍣</div>
+      <div class="resto-btn-info"><div class="resto-btn-nombre">Kusama Sushi</div><div class="resto-btn-cat">Sushi · Mariscos</div><span class="badge-cerrado">Cerrado</span></div>
+      <div class="resto-btn-arrow">›</div>
+    </div>`
+}
+
+// Verificar sesión activa al cargar
 sb.auth.getSession().then(function(result){
   if(result.data.session){
     var meta = result.data.session.user.user_metadata
     if(meta && meta.resto_nombre){
       restoActual = meta
-      mostrarPanel(meta.resto_nombre, meta.resto_emoji, meta.resto_cat)
+      // ── FIX: usar resto_id de metadata si existe ──
+      if(meta.resto_id) restauranteId = meta.resto_id
+      mostrarPanel(meta.resto_nombre, meta.resto_emoji || '🍽', meta.resto_cat || '')
     }
+  } else {
+    cargarListaRestos()
   }
 })
 
-function seleccionarResto(nombre, emoji, cat, estaAbierto){
-  restoActual = { resto_nombre: nombre, resto_emoji: emoji, resto_cat: cat }
+// ─── SELECCIONAR RESTAURANTE ────────────────────────────────────────────────
+// restoId viene precargado desde la lista (puede ser null si es fallback)
+function seleccionarResto(nombre, emoji, cat, estaAbierto, restoId){
+  restoActual = { resto_nombre: nombre, resto_emoji: emoji, resto_cat: cat, resto_id: restoId }
   document.getElementById('login-emoji').textContent = emoji
   document.getElementById('login-resto-nombre').textContent = nombre
   document.getElementById('login-email').value = ''
@@ -377,6 +398,7 @@ function volverRestos(){
   document.getElementById('screen-restos').style.display = 'flex'
 }
 
+// ─── LOGIN ──────────────────────────────────────────────────────────────────
 async function ingresar(){
   var email = document.getElementById('login-email').value.trim()
   var pass = document.getElementById('login-pass').value
@@ -388,9 +410,13 @@ async function ingresar(){
   var result = await sb.auth.signInWithPassword({ email: email, password: pass })
   if(result.error){ err.style.display='block'; err.textContent='Email o contraseña incorrectos'; btn.textContent='Ingresar →'; return }
   btn.textContent = 'Ingresar →'
+  // Obtener metadata actualizada del usuario
+  var meta = result.data.user.user_metadata
+  if(meta && meta.resto_id) restauranteId = meta.resto_id
   mostrarPanel(restoActual.resto_nombre, restoActual.resto_emoji, restoActual.resto_cat)
 }
 
+// ─── MOSTRAR PANEL ──────────────────────────────────────────────────────────
 async function mostrarPanel(nombre, emoji, cat){
   document.getElementById('rest-nombre').textContent = emoji + ' ' + nombre
   document.getElementById('local-nombre').textContent = nombre
@@ -399,18 +425,38 @@ async function mostrarPanel(nombre, emoji, cat){
   document.getElementById('screen-restos').style.display = 'none'
   var p = document.getElementById('screen-panel')
   p.style.display = 'flex'; p.style.flexDirection = 'column'
-  // Buscar ID del restaurante
-  var result = await sb.from('restaurantes').select('id').eq('nombre', nombre).single()
-  if(result.data) restauranteId = result.data.id
+
+  // ── FIX PRINCIPAL: intentar múltiples fuentes para restauranteId ──
+  if(!restauranteId){
+    // 1. Intentar desde restoActual (pasado al seleccionar desde lista)
+    if(restoActual && restoActual.resto_id){
+      restauranteId = restoActual.resto_id
+    } else {
+      // 2. Intentar desde metadata del usuario logueado
+      var session = await sb.auth.getSession()
+      var meta = session.data.session && session.data.session.user.user_metadata
+      if(meta && meta.resto_id){
+        restauranteId = meta.resto_id
+      } else {
+        // 3. Fallback: buscar por nombre en la tabla
+        var result = await sb.from('restaurantes').select('id').eq('nombre', nombre).single()
+        if(result.data) restauranteId = result.data.id
+        else console.warn('No se encontró restaurante con nombre:', nombre)
+      }
+    }
+  }
 }
 
 async function cerrarSesion(){
   await sb.auth.signOut()
+  restauranteId = null
+  restoActual = null
   document.getElementById('screen-panel').style.display = 'none'
   document.getElementById('screen-restos').style.display = 'flex'
-  restauranteId = null
+  cargarListaRestos()
 }
 
+// ─── TABS ───────────────────────────────────────────────────────────────────
 function switchTab(tab, el){
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active') })
   el.classList.add('active')
@@ -423,7 +469,7 @@ function switchTab(tab, el){
   if(tab === 'menu') cargarMenu()
 }
 
-// CARGAR MENU
+// ─── CARGAR MENU ────────────────────────────────────────────────────────────
 async function cargarMenu(){
   var lista = document.getElementById('lista-menu')
   lista.innerHTML = '<div class="loading-text">Cargando menú...</div>'
@@ -431,16 +477,16 @@ async function cargarMenu(){
   var result = await sb.from('productos').select('*').eq('restaurante_id', restauranteId).order('categoria').order('orden')
   if(result.error){ lista.innerHTML = '<div class="loading-text">Error: '+result.error.message+'</div>'; return }
   var productos = result.data
-  if(!productos.length){ lista.innerHTML = '<div class="loading-text">No hay productos. Agregá el primero!</div><button class="btn-add-prod" onclick="abrirModal(\'modal-producto\')">+ Agregar primer producto</button>'; return }
-
-  // Agrupar por categoría
+  if(!productos.length){
+    lista.innerHTML = '<div class="loading-text">No hay productos. Agregá el primero!</div><button class="btn-add-prod" onclick="abrirModal(\'modal-producto\')">+ Agregar primer producto</button>'
+    return
+  }
   var cats = {}
   productos.forEach(function(p){
     var cat = p.categoria || 'Sin categoría'
     if(!cats[cat]) cats[cat] = []
     cats[cat].push(p)
   })
-
   var html = ''
   var hoy = new Date().toISOString().split('T')[0]
   Object.keys(cats).forEach(function(cat){
@@ -472,7 +518,7 @@ async function cargarMenu(){
       if(tienePromo) html += '<div class="prod-promo-info">Promo hasta '+p.promocion_fin+'</div>'
       html += '</div>'
       html += '<div class="prod-actions">'
-      html += '<button class="btn-sm btn-sm-naranja" onclick="editarProducto('+JSON.stringify(p).replace(/"/g,"'")+')">✏️ Editar</button>'
+      html += '<button class="btn-sm btn-sm-naranja" onclick="editarProducto('+JSON.stringify(p).replace(/"/g,"'")+'  )">✏️ Editar</button>'
       if(p.disponible){
         html += '<button class="btn-sm btn-sm-gris" onclick="toggleDisponible(\''+p.id+'\',false)">⏸ Pausar</button>'
       } else {
@@ -487,6 +533,7 @@ async function cargarMenu(){
   lista.innerHTML = html
 }
 
+// ─── FOTO ───────────────────────────────────────────────────────────────────
 function previewFoto(input){
   var file = input.files[0]
   if(!file) return
@@ -500,6 +547,7 @@ function previewFoto(input){
   reader.readAsDataURL(file)
 }
 
+// ─── GUARDAR PRODUCTO ───────────────────────────────────────────────────────
 async function guardarProducto(){
   var nombre = document.getElementById('prod-nombre').value.trim()
   var desc = document.getElementById('prod-desc').value.trim()
@@ -510,9 +558,8 @@ async function guardarProducto(){
   msgOk.style.display='none'; msgErr.style.display='none'
 
   if(!nombre || !precio){ msgErr.style.display='block'; msgErr.textContent='Completá nombre y precio'; return }
-  if(!restauranteId){ msgErr.style.display='block'; msgErr.textContent='Error: no se encontró el restaurante'; return }
+  if(!restauranteId){ msgErr.style.display='block'; msgErr.textContent='Error: no se encontró el restaurante. Cerrá sesión y volvé a ingresar.'; return }
 
-  // Subir foto si hay
   var imagenUrl = null
   var fotoInput = document.getElementById('foto-input')
   if(fotoInput.files[0]){
