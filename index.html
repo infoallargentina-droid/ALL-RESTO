@@ -10,31 +10,49 @@
 <meta name="apple-mobile-web-app-title" content="ALL Resto"/>
 <meta name="theme-color" content="#FF4D00"/>
 <link rel="manifest" href="manifest.json"/>
-<title>ALL — App Restaurante</title>
+<title>ALL — App Restaurante v1.1</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden}
 body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
-#screen-login{display:flex;width:100%;height:100vh;background:#1A1A1A;flex-direction:column;overflow:hidden}
-#screen-panel{display:none;width:100%;height:100vh;background:#FFF4EF;flex-direction:column;overflow:hidden}
-.login-hero{background:#1A1A1A;padding:48px 24px 24px;display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0}
-.login-title{font-size:26px;font-weight:700;letter-spacing:-1px;color:#fff}
-.login-sub{font-size:12px;color:rgba(255,255,255,0.4)}
+
+/* PANTALLA 1 - ELEGIR RESTO */
+#screen-restos{display:flex;width:100%;height:100vh;background:#1A1A1A;flex-direction:column;overflow:hidden}
+.restos-hero{background:#1A1A1A;padding:48px 24px 20px;display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0}
+.restos-title{font-size:26px;font-weight:700;letter-spacing:-1px;color:#fff}
+.restos-sub{font-size:12px;color:rgba(255,255,255,0.4)}
+.restos-body{flex:1;background:#fff;border-radius:28px 28px 0 0;padding:24px 20px;overflow-y:auto}
+.restos-label{font-size:11px;font-weight:600;color:#888;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+.resto-btn{width:100%;display:flex;align-items:center;gap:16px;padding:16px;border-radius:16px;border:2px solid #eee;background:#fafafa;cursor:pointer;margin-bottom:12px;transition:.15s;text-align:left}
+.resto-btn:hover{border-color:#FF4D00;background:#FFF4EF}
+.resto-btn-emoji{font-size:28px;width:56px;height:56px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;border:1px solid #eee;flex-shrink:0}
+.resto-btn-info{flex:1}
+.resto-btn-nombre{font-size:16px;font-weight:700;color:#1A1A1A}
+.resto-btn-cat{font-size:12px;color:#888;margin-top:3px}
+.resto-btn-arrow{font-size:20px;color:#ccc;flex-shrink:0}
+.resto-btn-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;margin-top:5px;display:inline-block}
+.badge-abierto{background:#E8F5E9;color:#2D6A2D}
+.badge-cerrado{background:#f5f5f5;color:#aaa}
+
+/* PANTALLA 2 - LOGIN */
+#screen-login{display:none;width:100%;height:100vh;flex-direction:column;overflow:hidden}
+.login-hero{padding:48px 24px 24px;display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0}
+.login-back{position:absolute;top:52px;left:20px;font-size:24px;color:rgba(255,255,255,0.6);cursor:pointer;background:none;border:none}
+.login-resto-emoji{font-size:40px;width:72px;height:72px;border-radius:20px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center}
+.login-title{font-size:22px;font-weight:700;letter-spacing:-0.5px;color:#fff}
+.login-sub{font-size:12px;color:rgba(255,255,255,0.4);text-align:center}
 .login-body{flex:1;background:#fff;border-radius:28px 28px 0 0;padding:28px 20px;overflow-y:auto}
 .field-label{font-size:12px;font-weight:600;color:#1A1A1A;margin-bottom:8px}
-.rest-opt{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;border:2px solid #eee;cursor:pointer;background:#fafafa;margin-bottom:10px}
-.rest-opt.sel{border-color:#FF4D00;background:#FFF4EF}
-.rest-emoji{font-size:24px;width:46px;height:46px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;border:1px solid #eee;flex-shrink:0}
-.rest-nombre{font-size:15px;font-weight:600;color:#1A1A1A}
-.rest-cat{font-size:11px;color:#888;margin-top:2px}
-.check{margin-left:auto;width:24px;height:24px;border-radius:50%;background:#FF4D00;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;flex-shrink:0}
-.pass-wrap{position:relative;margin-bottom:16px}
-.pass-wrap input{margin-bottom:0;padding-right:48px}
-.pass-ojo{position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px;user-select:none}
 .input{width:100%;padding:14px;font-size:15px;border-radius:12px;border:1.5px solid #eee;background:#fafafa;color:#1A1A1A;margin-bottom:16px;outline:none}
 .btn-main{width:100%;padding:16px;background:#FF4D00;color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer}
 .error-msg{color:#E24B4A;font-size:12px;margin-bottom:12px;padding:10px;background:#FFF0F0;border-radius:8px;display:none}
+.pass-wrap{position:relative;margin-bottom:16px}
+.pass-wrap input{margin-bottom:0;padding-right:48px}
+.pass-ojo{position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px;user-select:none}
+
+/* PANTALLA 3 - PANEL */
+#screen-panel{display:none;width:100%;height:100vh;background:#FFF4EF;flex-direction:column;overflow:hidden}
 .topbar{padding:48px 16px 12px;background:#fff;border-bottom:1px solid #FFE8DC;display:flex;align-items:center;gap:8px;flex-shrink:0}
 .topbar-name{font-size:15px;font-weight:700;color:#1A1A1A}
 .topbar-sub{font-size:11px;color:#888;margin-top:2px}
@@ -79,40 +97,74 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 .info-card{background:#fff;border-radius:14px;border:1px solid #FFE8DC;padding:16px;margin-bottom:10px}
 .info-label{font-size:11px;color:#888;margin-bottom:6px}
 .info-val{font-size:15px;font-weight:600;color:#1A1A1A}
+.version{font-size:10px;color:#ccc;text-align:center;padding:8px 0}
 .hidden{display:none !important}
 </style>
 </head>
 <body>
 
-<div id="screen-login">
-  <div class="login-hero">
-    <svg width="70" height="70" viewBox="0 0 60 60">
+<!-- PANTALLA 1: ELEGIR RESTAURANTE -->
+<div id="screen-restos">
+  <div class="restos-hero">
+    <svg width="60" height="60" viewBox="0 0 60 60">
       <circle cx="30" cy="30" r="26" fill="none" stroke="#FF4D00" stroke-width="4"
         stroke-dasharray="140 24" stroke-dashoffset="-4" stroke-linecap="round"/>
       <circle cx="50" cy="13" r="4" fill="#FFD166"/>
       <text x="30" y="38" text-anchor="middle" font-family="system-ui"
         font-weight="700" font-size="20" letter-spacing="-1" fill="white">ALL</text>
     </svg>
-    <div class="login-title">App Restaurante</div>
-    <div class="login-sub">Ingresá con tu cuenta</div>
+    <div class="restos-title">App Restaurante</div>
+    <div class="restos-sub">Seleccioná tu local para continuar</div>
+  </div>
+  <div class="restos-body">
+    <div class="restos-label">Nuestros restaurantes</div>
+    <div id="lista-restos">
+      <!-- Se cargan desde Supabase -->
+      <div class="resto-btn" onclick="seleccionarResto('El Bodegón NKT','🦞','Mariscos · Pizzas · Sándwiches',true)">
+        <div class="resto-btn-emoji">🦞</div>
+        <div class="resto-btn-info">
+          <div class="resto-btn-nombre">El Bodegón NKT</div>
+          <div class="resto-btn-cat">Mariscos · Pizzas · Sándwiches</div>
+          <span class="resto-btn-badge badge-abierto">Abierto</span>
+        </div>
+        <div class="resto-btn-arrow">›</div>
+      </div>
+      <div class="resto-btn" onclick="seleccionarResto('Colantonio\'s','🍕','Pizza napolitana · Empanadas',true)">
+        <div class="resto-btn-emoji">🍕</div>
+        <div class="resto-btn-info">
+          <div class="resto-btn-nombre">Colantonio's</div>
+          <div class="resto-btn-cat">Pizza napolitana · Empanadas</div>
+          <span class="resto-btn-badge badge-abierto">Abierto</span>
+        </div>
+        <div class="resto-btn-arrow">›</div>
+      </div>
+      <div class="resto-btn" onclick="seleccionarResto('Kusama Sushi','🍣','Sushi · Mariscos',false)">
+        <div class="resto-btn-emoji">🍣</div>
+        <div class="resto-btn-info">
+          <div class="resto-btn-nombre">Kusama Sushi</div>
+          <div class="resto-btn-cat">Sushi · Mariscos</div>
+          <span class="resto-btn-badge badge-cerrado">Cerrado</span>
+        </div>
+        <div class="resto-btn-arrow">›</div>
+      </div>
+    </div>
+    <div class="version">ALL App Restaurante v1.1</div>
+  </div>
+</div>
+
+<!-- PANTALLA 2: LOGIN -->
+<div id="screen-login">
+  <div class="login-hero" id="login-hero" style="background:#1A1A1A;position:relative">
+    <button class="login-back" onclick="volverRestos()">‹</button>
+    <div class="login-resto-emoji" id="login-emoji">🦞</div>
+    <div class="login-title" id="login-resto-nombre">El Bodegón NKT</div>
+    <div class="login-sub">Ingresá con tu cuenta de encargado</div>
   </div>
   <div class="login-body">
     <div id="error-msg" class="error-msg"></div>
-    <div class="field-label">Seleccioná tu restaurante</div>
-    <div class="rest-opt sel" onclick="selectRest(this,0)">
-      <div class="rest-emoji">🦞</div>
-      <div><div class="rest-nombre">El Bodegón NKT</div><div class="rest-cat">Mariscos · Pizzas · Sándwiches</div></div>
-      <div class="check">✓</div>
-    </div>
-    <div class="rest-opt" onclick="selectRest(this,1)">
-      <div class="rest-emoji">🍕</div>
-      <div><div class="rest-nombre">Colantonio's</div><div class="rest-cat">Pizza napolitana · Empanadas</div></div>
-    </div>
-    <div class="rest-opt" onclick="selectRest(this,2)">
-      <div class="rest-emoji">🍣</div>
-      <div><div class="rest-nombre">Kusama Sushi</div><div class="rest-cat">Sushi · Mariscos</div></div>
-    </div>
-    <div class="field-label" style="margin-top:20px">Contraseña</div>
+    <div class="field-label">Email</div>
+    <input type="email" placeholder="encargado@gmail.com" class="input" id="login-email"/>
+    <div class="field-label">Contraseña</div>
     <div class="pass-wrap">
       <input type="password" placeholder="••••••••" class="input" id="login-pass"/>
       <span class="pass-ojo" id="ojo-login" onclick="togglePass('login-pass','ojo-login')">👁</span>
@@ -121,11 +173,12 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
   </div>
 </div>
 
+<!-- PANTALLA 3: PANEL -->
 <div id="screen-panel">
   <div class="topbar">
     <div>
       <div class="topbar-name" id="rest-nombre">🦞 El Bodegón NKT</div>
-      <div class="topbar-sub">Panel del local</div>
+      <div class="topbar-sub">Panel del local · v1.1</div>
     </div>
     <div class="estado-badge">
       <div class="dot" id="estado-dot" style="background:#2D6A2D"></div>
@@ -189,20 +242,6 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
       <div class="icon-btn">✏️</div>
       <div class="icon-btn" style="background:#FFF0F0">🗑</div>
     </div>
-    <div class="menu-item">
-      <div style="flex:1"><div class="menu-nombre">Empanadas de mariscos</div><div class="menu-desc">x3 unidades, al horno</div></div>
-      <div class="menu-precio">$4.200</div>
-      <div class="icon-btn">✏️</div>
-      <div class="icon-btn" style="background:#FFF0F0">🗑</div>
-    </div>
-    <button class="btn-add-prod">+ Agregar producto</button>
-    <div class="cat-label">Pizzas</div>
-    <div class="menu-item">
-      <div style="flex:1"><div class="menu-nombre">Pizza de mariscos</div><div class="menu-desc">Mozzarella, langostinos, rúcula</div></div>
-      <div class="menu-precio">$5.900</div>
-      <div class="icon-btn">✏️</div>
-      <div class="icon-btn" style="background:#FFF0F0">🗑</div>
-    </div>
     <button class="btn-add-prod">+ Agregar producto</button>
   </div>
 
@@ -219,7 +258,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
       <div class="info-label">Tiempo de entrega</div>
       <div class="info-val">25 – 40 min</div>
     </div>
-    <button class="btn-main" style="margin-top:16px" onclick="cerrarSesion()">Cerrar sesión</button>
+    <button class="btn-main" style="margin-top:16px;background:#1A1A1A" onclick="cerrarSesion()">Cerrar sesión</button>
   </div>
 </div>
 
@@ -230,68 +269,72 @@ const sb = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJraW5pZWNrbW1sdmxkbmNjYnptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM1NTQsImV4cCI6MjA5NTgxOTU1NH0.Mb82xSMu5KSwgju-rUEh-BBWNVLmJ3Fso5EZy4QeOvs'
 )
 
-var restSeleccionado = 0
+var restoActual = null
 var abierto = true
-var rests = [
-  { nombre: 'El Bodegón NKT', emoji: '🦞', cat: 'Mariscos · Pizzas · Sándwiches', email: 'bodegon@all.com' },
-  { nombre: "Colantonio's", emoji: '🍕', cat: 'Pizza napolitana · Empanadas', email: 'colantonio@all.com' },
-  { nombre: 'Kusama Sushi', emoji: '🍣', cat: 'Sushi · Mariscos', email: 'kusama@all.com' },
-]
 
+// Verificar sesión guardada
 sb.auth.getSession().then(function(result){
   if(result.data.session){
-    var email = result.data.session.user.email
-    var idx = rests.findIndex(function(r){ return r.email === email })
-    if(idx >= 0){ restSeleccionado = idx; mostrarPanel() }
+    var meta = result.data.session.user.user_metadata
+    if(meta && meta.resto_nombre){
+      restoActual = meta
+      mostrarPanel(meta.resto_nombre, meta.resto_emoji, meta.resto_cat)
+    }
   }
 })
 
-function selectRest(el, idx){
-  restSeleccionado = idx
-  document.querySelectorAll('.rest-opt').forEach(function(o){
-    o.classList.remove('sel')
-    var c = o.querySelector('.check')
-    if(c) c.remove()
-  })
-  el.classList.add('sel')
-  var chk = document.createElement('div')
-  chk.className = 'check'
-  chk.textContent = '✓'
-  el.appendChild(chk)
+function seleccionarResto(nombre, emoji, cat, estaAbierto){
+  restoActual = { resto_nombre: nombre, resto_emoji: emoji, resto_cat: cat }
+  document.getElementById('login-emoji').textContent = emoji
+  document.getElementById('login-resto-nombre').textContent = nombre
+  document.getElementById('login-email').value = ''
+  document.getElementById('login-pass').value = ''
+  document.getElementById('error-msg').style.display = 'none'
+  document.getElementById('screen-restos').style.display = 'none'
+  var loginScreen = document.getElementById('screen-login')
+  loginScreen.style.display = 'flex'
+  loginScreen.style.flexDirection = 'column'
+}
+
+function volverRestos(){
+  document.getElementById('screen-login').style.display = 'none'
+  document.getElementById('screen-restos').style.display = 'flex'
 }
 
 async function ingresar(){
+  var email = document.getElementById('login-email').value.trim()
   var pass = document.getElementById('login-pass').value
   var btn = document.getElementById('btn-ingresar')
   var err = document.getElementById('error-msg')
-  var r = rests[restSeleccionado]
-  if(!pass){ err.style.display='block'; err.textContent='Ingresá tu contraseña'; return }
+  if(!email || !pass){ err.style.display='block'; err.textContent='Completá email y contraseña'; return }
   btn.textContent = 'Ingresando...'
   err.style.display = 'none'
-  var result = await sb.auth.signInWithPassword({ email: r.email, password: pass })
+  var result = await sb.auth.signInWithPassword({ email: email, password: pass })
   if(result.error){
-    err.style.display = 'block'
-    err.textContent = 'Contraseña incorrecta'
-    btn.textContent = 'Ingresar →'
+    err.style.display='block'
+    err.textContent='Email o contraseña incorrectos'
+    btn.textContent='Ingresar →'
     return
   }
-  mostrarPanel()
+  btn.textContent = 'Ingresar →'
+  mostrarPanel(restoActual.resto_nombre, restoActual.resto_emoji, restoActual.resto_cat)
 }
 
-function mostrarPanel(){
-  var r = rests[restSeleccionado]
-  document.getElementById('rest-nombre').textContent = r.emoji + ' ' + r.nombre
-  document.getElementById('local-nombre').textContent = r.nombre
-  document.getElementById('local-cat').textContent = r.cat
+function mostrarPanel(nombre, emoji, cat){
+  document.getElementById('rest-nombre').textContent = emoji + ' ' + nombre
+  document.getElementById('local-nombre').textContent = nombre
+  document.getElementById('local-cat').textContent = cat
   document.getElementById('screen-login').style.display = 'none'
-  document.getElementById('screen-panel').style.display = 'flex'
-  document.getElementById('btn-ingresar').textContent = 'Ingresar →'
+  document.getElementById('screen-restos').style.display = 'none'
+  var panel = document.getElementById('screen-panel')
+  panel.style.display = 'flex'
+  panel.style.flexDirection = 'column'
 }
 
 async function cerrarSesion(){
   await sb.auth.signOut()
   document.getElementById('screen-panel').style.display = 'none'
-  document.getElementById('screen-login').style.display = 'flex'
+  document.getElementById('screen-restos').style.display = 'flex'
 }
 
 function togglePass(inputId, ojoId){
@@ -320,13 +363,13 @@ function toggleAbierto(){
   var texto = document.getElementById('estado-texto')
   var sub = document.getElementById('toggle-sub-text')
   if(abierto){
-    track.style.background = '#2D6A2D'; thumb.style.left = '23px'
-    dot.style.background = '#2D6A2D'; texto.style.color = '#2D6A2D'
-    texto.textContent = 'Abierto'; sub.textContent = 'Recibiendo pedidos'
+    track.style.background='#2D6A2D'; thumb.style.left='23px'
+    dot.style.background='#2D6A2D'; texto.style.color='#2D6A2D'
+    texto.textContent='Abierto'; sub.textContent='Recibiendo pedidos'
   } else {
-    track.style.background = '#ddd'; thumb.style.left = '3px'
-    dot.style.background = '#ccc'; texto.style.color = '#ccc'
-    texto.textContent = 'Cerrado'; sub.textContent = 'Local pausado'
+    track.style.background='#ddd'; thumb.style.left='3px'
+    dot.style.background='#ccc'; texto.style.color='#ccc'
+    texto.textContent='Cerrado'; sub.textContent='Local pausado'
   }
 }
 
