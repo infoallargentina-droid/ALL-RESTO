@@ -25,7 +25,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 .restos-label{font-size:11px;font-weight:600;color:#888;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
 .resto-btn{width:100%;display:flex;align-items:center;gap:16px;padding:16px;border-radius:16px;border:2px solid #eee;background:#fafafa;cursor:pointer;margin-bottom:12px;transition:.15s;text-align:left}
 .resto-btn:active{border-color:#FF4D00;background:#FFF4EF}
-.resto-btn-emoji{font-size:28px;width:56px;height:56px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;border:1px solid #eee;flex-shrink:0}
+.resto-btn-emoji{font-size:28px;width:56px;height:56px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;border:1px solid #eee;flex-shrink:0;overflow:hidden}
+.resto-btn-logo{width:100%;height:100%;object-fit:cover;border-radius:14px}
 .resto-btn-info{flex:1}
 .resto-btn-nombre{font-size:16px;font-weight:700;color:#1A1A1A}
 .resto-btn-cat{font-size:12px;color:#888;margin-top:3px}
@@ -36,7 +37,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 #screen-login{display:none;width:100%;height:100vh;flex-direction:column;overflow:hidden}
 .login-hero{padding:48px 24px 24px;display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;position:relative}
 .login-back{position:absolute;top:52px;left:20px;font-size:24px;color:rgba(255,255,255,0.6);cursor:pointer;background:none;border:none}
-.login-resto-emoji{font-size:40px;width:72px;height:72px;border-radius:20px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center}
+.login-resto-emoji{font-size:40px;width:72px;height:72px;border-radius:20px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.login-resto-logo{width:100%;height:100%;object-fit:cover;border-radius:20px}
 .login-title{font-size:22px;font-weight:700;letter-spacing:-0.5px;color:#fff}
 .login-sub{font-size:12px;color:rgba(255,255,255,0.4);text-align:center}
 .login-body{flex:1;background:#fff;border-radius:28px 28px 0 0;padding:28px 20px;overflow-y:auto}
@@ -50,7 +52,9 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 .pass-ojo{position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px;user-select:none}
 
 #screen-panel{display:none;width:100%;height:100vh;background:#FFF4EF;flex-direction:column;overflow:hidden}
-.topbar{padding:48px 16px 12px;background:#fff;border-bottom:1px solid #FFE8DC;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.topbar{padding:48px 16px 12px;background:#fff;border-bottom:1px solid #FFE8DC;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.topbar-logo{width:38px;height:38px;border-radius:10px;background:#FFF4EF;display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden;flex-shrink:0;border:1px solid #FFE8DC}
+.topbar-logo img{width:100%;height:100%;object-fit:cover}
 .topbar-name{font-size:15px;font-weight:700;color:#1A1A1A}
 .topbar-sub{font-size:11px;color:#888;margin-top:2px}
 .estado-badge{margin-left:auto;display:flex;align-items:center;gap:6px}
@@ -88,7 +92,11 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 .btn-listo{padding:10px 18px;border-radius:20px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:#2D6A2D;color:#fff}
 
 .menu-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.cat-label{font-size:11px;font-weight:700;color:#FF4D00;letter-spacing:1px;text-transform:uppercase;margin:16px 0 8px}
+.cat-label{font-size:11px;font-weight:700;color:#FF4D00;letter-spacing:1px;text-transform:uppercase;margin:16px 0 8px;display:flex;align-items:center;justify-content:space-between}
+.cat-label-text{flex:1}
+.cat-label-actions{display:flex;gap:6px}
+.btn-cat-up{background:none;border:none;cursor:pointer;font-size:14px;padding:2px 4px;color:#aaa}
+.btn-cat-up:active{color:#FF4D00}
 .btn-nueva-cat{padding:7px 14px;border-radius:20px;background:#FFF4EF;color:#FF4D00;border:1px solid #FFE8DC;font-size:12px;font-weight:600;cursor:pointer}
 
 .prod-card{background:#fff;border-radius:14px;border:1px solid #FFE8DC;margin-bottom:10px;overflow:hidden;position:relative}
@@ -104,7 +112,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 .prod-precio{font-size:16px;font-weight:700;color:#FF4D00}
 .prod-precio-original{font-size:13px;color:#aaa;text-decoration:line-through}
 .prod-promo-info{font-size:10px;color:#2D6A2D;background:#E8F5E9;padding:2px 8px;border-radius:20px;margin-top:4px;display:inline-block}
-.prod-actions{display:flex;gap:8px;padding:10px 14px;border-top:1px solid #FFE8DC}
+.prod-actions{display:flex;gap:8px;padding:10px 14px;border-top:1px solid #FFE8DC;flex-wrap:wrap}
 .btn-sm{padding:7px 12px;border-radius:20px;border:none;font-size:11px;font-weight:700;cursor:pointer}
 .btn-sm-naranja{background:#FFF0E5;color:#FF4D00}
 .btn-sm-verde{background:#E8F5E9;color:#2D6A2D}
@@ -112,11 +120,33 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 .btn-sm-rojo{background:#FFF0F0;color:#E24B4A}
 .btn-add-prod{width:100%;padding:14px;background:#FFF4EF;color:#FF4D00;border:1.5px dashed #FF4D00;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;margin-bottom:16px}
 
+/* MI LOCAL */
 .info-card{background:#fff;border-radius:14px;border:1px solid #FFE8DC;padding:16px;margin-bottom:10px}
 .info-label{font-size:11px;color:#888;margin-bottom:6px}
 .info-val{font-size:15px;font-weight:600;color:#1A1A1A}
+.logo-actual{width:80px;height:80px;border-radius:16px;object-fit:cover;border:2px solid #FFE8DC;display:block;margin-bottom:10px}
+.logo-placeholder{width:80px;height:80px;border-radius:16px;background:#FFF4EF;border:2px dashed #FFD0B0;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:10px;cursor:pointer}
+.btn-cambiar-logo{padding:8px 16px;background:#FFF4EF;color:#FF4D00;border:1px solid #FFE8DC;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer}
 .version{font-size:10px;color:#ccc;text-align:center;padding:8px 0}
 
+/* CATEGORÍAS */
+.cats-section{background:#fff;border-radius:14px;border:1px solid #FFE8DC;padding:16px;margin-bottom:10px}
+.cats-title{font-size:13px;font-weight:700;color:#1A1A1A;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.cat-chip{display:inline-flex;align-items:center;gap:6px;background:#FFF4EF;border:1px solid #FFE8DC;border-radius:20px;padding:6px 12px;margin:4px;font-size:12px;font-weight:600;color:#1A1A1A;cursor:grab}
+.cat-chip-del{font-size:14px;color:#ccc;cursor:pointer;line-height:1}
+.cat-chip-del:hover{color:#E24B4A}
+.cat-chip.dragging{opacity:0.4}
+.cat-chip.drag-over{border-color:#FF4D00;background:#FFE8DC}
+.cats-chips{min-height:44px;display:flex;flex-wrap:wrap;align-items:flex-start}
+.cats-sugeridas{margin-top:12px;border-top:1px solid #f5f5f5;padding-top:12px}
+.cats-sugeridas-title{font-size:11px;color:#888;margin-bottom:8px;font-weight:600}
+.cat-sugerida-btn{display:inline-block;background:#f5f5f5;color:#555;border-radius:20px;padding:6px 12px;margin:3px;font-size:12px;cursor:pointer;border:none}
+.cat-sugerida-btn:active{background:#FFF4EF;color:#FF4D00}
+.cat-add-row{display:flex;gap:8px;margin-top:12px}
+.cat-add-input{flex:1;padding:10px 14px;font-size:14px;border-radius:12px;border:1.5px solid #eee;background:#fafafa;color:#1A1A1A;outline:none}
+.cat-add-btn{padding:10px 16px;background:#FF4D00;color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer}
+
+/* MODAL */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;z-index:100}
 .modal{background:#fff;border-radius:24px 24px 0 0;padding:24px 20px;width:100%;max-height:90vh;overflow-y:auto}
 .modal-title{font-size:18px;font-weight:700;color:#1A1A1A;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between}
@@ -133,6 +163,12 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .hidden{display:none !important}
 .loading-text{text-align:center;padding:20px;color:#888;font-size:13px}
+
+/* selector de categoría con chips */
+.cat-selector{margin-bottom:16px}
+.cat-selector-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.cat-sel-chip{padding:7px 14px;border-radius:20px;border:1.5px solid #eee;background:#fafafa;font-size:13px;font-weight:600;color:#555;cursor:pointer;transition:.15s}
+.cat-sel-chip.selected{background:#FF4D00;color:#fff;border-color:#FF4D00}
 </style>
 </head>
 <body>
@@ -161,8 +197,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 <div id="screen-login">
   <div class="login-hero" style="background:#1A1A1A">
     <button class="login-back" onclick="volverRestos()">‹</button>
-    <div class="login-resto-emoji" id="login-emoji">🦞</div>
-    <div class="login-title" id="login-resto-nombre">El Bodegón NKT</div>
+    <div class="login-resto-emoji" id="login-emoji-wrap">🦞</div>
+    <div class="login-title" id="login-resto-nombre">Restaurante</div>
     <div class="login-sub">Ingresá con tu cuenta de encargado</div>
   </div>
   <div class="login-body">
@@ -181,8 +217,9 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 <!-- PANTALLA 3: PANEL -->
 <div id="screen-panel">
   <div class="topbar">
+    <div class="topbar-logo" id="topbar-logo-wrap">🍽</div>
     <div>
-      <div class="topbar-name" id="rest-nombre">🦞 El Bodegón NKT</div>
+      <div class="topbar-name" id="rest-nombre">Restaurante</div>
       <div class="topbar-sub">Panel del local · v1.2</div>
     </div>
     <div class="estado-badge">
@@ -229,17 +266,49 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
   <div id="tab-menu" class="scroll hidden">
     <div class="menu-header">
       <div style="font-size:13px;font-weight:600;color:#1A1A1A">Gestión del menú</div>
-      <button class="btn-nueva-cat" onclick="abrirModal('modal-producto')">+ Producto</button>
+      <button class="btn-nueva-cat" onclick="abrirNuevoProducto()">+ Producto</button>
     </div>
     <div id="lista-menu"><div class="loading-text">Cargando menú...</div></div>
   </div>
 
   <!-- TAB LOCAL -->
   <div id="tab-local" class="scroll hidden">
-    <div class="info-card"><div class="info-label">Restaurante</div><div class="info-val" id="local-nombre">El Bodegón NKT</div></div>
-    <div class="info-card"><div class="info-label">Categoría</div><div class="info-val" id="local-cat">Mariscos · Pizzas · Sándwiches</div></div>
+
+    <!-- LOGO DEL LOCAL -->
+    <div class="info-card">
+      <div class="info-label">Logo / foto del local</div>
+      <div id="logo-preview-wrap">
+        <div class="logo-placeholder" onclick="document.getElementById('logo-input').click()" id="logo-placeholder">🏪</div>
+      </div>
+      <input type="file" id="logo-input" accept="image/*" style="display:none" onchange="subirLogo(this)"/>
+      <button class="btn-cambiar-logo" onclick="document.getElementById('logo-input').click()">📷 Cambiar logo</button>
+      <div id="logo-msg" style="font-size:11px;color:#2D6A2D;margin-top:8px;display:none">✓ Logo actualizado</div>
+    </div>
+
+    <div class="info-card"><div class="info-label">Restaurante</div><div class="info-val" id="local-nombre">–</div></div>
+    <div class="info-card"><div class="info-label">Categoría</div><div class="info-val" id="local-cat">–</div></div>
     <div class="info-card"><div class="info-label">Tiempo de entrega</div><div class="info-val">25 – 40 min</div></div>
-    <button class="btn-main btn-dark" style="margin-top:16px" onclick="cerrarSesion()">Cerrar sesión</button>
+
+    <!-- CATEGORÍAS DE PRODUCTOS -->
+    <div class="cats-section">
+      <div class="cats-title">
+        <span>📂 Categorías del menú</span>
+        <span style="font-size:11px;color:#aaa;font-weight:400">arrastrá para reordenar</span>
+      </div>
+      <div class="cats-chips" id="cats-chips"></div>
+      <div class="cat-add-row">
+        <input type="text" class="cat-add-input" id="nueva-cat-input" placeholder="Nueva categoría..."/>
+        <button class="cat-add-btn" onclick="agregarCategoria()">+</button>
+      </div>
+      <div class="cats-sugeridas">
+        <div class="cats-sugeridas-title">Sugerencias:</div>
+        <div id="cats-sugeridas-wrap"></div>
+      </div>
+      <button class="btn-main" style="margin-top:14px" onclick="guardarCategorias()">Guardar orden</button>
+      <div id="cats-msg-ok" style="font-size:11px;color:#2D6A2D;margin-top:8px;text-align:center;display:none">✓ Categorías guardadas</div>
+    </div>
+
+    <button class="btn-main btn-dark" style="margin-top:6px" onclick="cerrarSesion()">Cerrar sesión</button>
     <div class="version">ALL App Restaurante v1.2</div>
   </div>
 </div>
@@ -268,9 +337,12 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     <input type="text" id="prod-desc" placeholder="Ej: Mozzarella, langostinos, rúcula" class="input"/>
 
     <div class="field-label">Categoría</div>
-    <input type="text" id="prod-cat" placeholder="Ej: Pizzas, Mariscos, Bebidas..." class="input"/>
+    <div class="cat-selector">
+      <div class="cat-selector-chips" id="cat-selector-chips"></div>
+      <input type="text" id="prod-cat" placeholder="O escribí una nueva..." class="input" style="margin-bottom:0" oninput="sincronizarCatInput()"/>
+    </div>
 
-    <div class="field-label">Precio</div>
+    <div class="field-label" style="margin-top:16px">Precio</div>
     <input type="number" id="prod-precio" placeholder="Ej: 5900" class="input"/>
 
     <div class="promo-section">
@@ -315,75 +387,57 @@ var restoActual = null
 var abierto = true
 var promoActiva = false
 var restauranteId = null
-var editandoProducto = null
+var categoriasLocales = []
 
-// ─── CARGAR LISTA DE RESTAURANTES DESDE SUPABASE ───────────────────────────
+const CATS_SUGERIDAS = ['Pizzas','Empanadas','Bebidas','Postres','Entradas','Carnes','Pastas','Sushi','Hamburguesas','Sandwiches','Ensaladas','Combos','Para compartir','Sin TACC']
+
+// ─── CARGAR LISTA DE RESTAURANTES ───────────────────────────────────────────
 async function cargarListaRestos(){
   var lista = document.getElementById('lista-restos')
-  var result = await sb.from('restaurantes').select('id,nombre,categoria,abierto').order('nombre')
+  var result = await sb.from('restaurantes').select('id,nombre,categoria,abierto,logo_url').order('nombre')
   if(result.error || !result.data || !result.data.length){
-    // fallback hardcodeado
-    lista.innerHTML = renderRestoBtnHardcoded()
-    return
+    lista.innerHTML = renderRestoBtnHardcoded(); return
   }
   var html = ''
   var emojis = { 'El Bodegón NKT':'🦞', "Colantonio's":'🍕', 'Kusama Sushi':'🍣' }
   result.data.forEach(function(r){
     var emoji = emojis[r.nombre] || '🍽'
     var estaAbierto = r.abierto !== false
-    html += '<div class="resto-btn" onclick="seleccionarResto(\''+r.nombre.replace(/'/g,"\\'")+'\',' +
-      '\''+emoji+'\',\''+( r.categoria||'' ).replace(/'/g,"\\'")+'\','+estaAbierto+',\''+r.id+'\')">'
-    html += '<div class="resto-btn-emoji">'+emoji+'</div>'
-    html += '<div class="resto-btn-info">'
-    html += '<div class="resto-btn-nombre">'+r.nombre+'</div>'
+    var logoHtml = r.logo_url
+      ? '<img class="resto-btn-logo" src="'+r.logo_url+'" alt="logo"/>'
+      : emoji
+    html += '<div class="resto-btn" onclick="seleccionarResto(\''+escQ(r.nombre)+'\',\''+emoji+'\',\''+escQ(r.categoria||'')+'\','+estaAbierto+',\''+r.id+'\',\''+escQ(r.logo_url||'')+'\')">'
+    html += '<div class="resto-btn-emoji">'+logoHtml+'</div>'
+    html += '<div class="resto-btn-info"><div class="resto-btn-nombre">'+r.nombre+'</div>'
     html += '<div class="resto-btn-cat">'+(r.categoria||'')+'</div>'
-    html += estaAbierto
-      ? '<span class="badge-abierto">Abierto</span>'
-      : '<span class="badge-cerrado">Cerrado</span>'
+    html += estaAbierto ? '<span class="badge-abierto">Abierto</span>' : '<span class="badge-cerrado">Cerrado</span>'
     html += '</div><div class="resto-btn-arrow">›</div></div>'
   })
   lista.innerHTML = html
 }
 
+function escQ(s){ return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'") }
+
 function renderRestoBtnHardcoded(){
-  return `
-    <div class="resto-btn" onclick="seleccionarResto('El Bodegón NKT','🦞','Mariscos · Pizzas · Sándwiches',true,null)">
-      <div class="resto-btn-emoji">🦞</div>
-      <div class="resto-btn-info"><div class="resto-btn-nombre">El Bodegón NKT</div><div class="resto-btn-cat">Mariscos · Pizzas · Sándwiches</div><span class="badge-abierto">Abierto</span></div>
-      <div class="resto-btn-arrow">›</div>
-    </div>
-    <div class="resto-btn" onclick="seleccionarResto('Colantonio\\'s','🍕','Pizza napolitana · Empanadas',true,null)">
-      <div class="resto-btn-emoji">🍕</div>
-      <div class="resto-btn-info"><div class="resto-btn-nombre">Colantonio's</div><div class="resto-btn-cat">Pizza napolitana · Empanadas</div><span class="badge-abierto">Abierto</span></div>
-      <div class="resto-btn-arrow">›</div>
-    </div>
-    <div class="resto-btn" onclick="seleccionarResto('Kusama Sushi','🍣','Sushi · Mariscos',false,null)">
-      <div class="resto-btn-emoji">🍣</div>
-      <div class="resto-btn-info"><div class="resto-btn-nombre">Kusama Sushi</div><div class="resto-btn-cat">Sushi · Mariscos</div><span class="badge-cerrado">Cerrado</span></div>
-      <div class="resto-btn-arrow">›</div>
-    </div>`
+  return '<div class="loading-text">No hay restaurantes configurados</div>'
 }
 
-// Verificar sesión activa al cargar
+// ─── SESIÓN ──────────────────────────────────────────────────────────────────
 sb.auth.getSession().then(function(result){
   if(result.data.session){
     var meta = result.data.session.user.user_metadata
     if(meta && meta.resto_nombre){
       restoActual = meta
-      // ── FIX: usar resto_id de metadata si existe ──
       if(meta.resto_id) restauranteId = meta.resto_id
-      mostrarPanel(meta.resto_nombre, meta.resto_emoji || '🍽', meta.resto_cat || '')
-    }
-  } else {
-    cargarListaRestos()
-  }
+      mostrarPanel(meta.resto_nombre, meta.resto_emoji||'🍽', meta.resto_cat||'', meta.resto_logo||'')
+    } else { cargarListaRestos() }
+  } else { cargarListaRestos() }
 })
 
-// ─── SELECCIONAR RESTAURANTE ────────────────────────────────────────────────
-// restoId viene precargado desde la lista (puede ser null si es fallback)
-function seleccionarResto(nombre, emoji, cat, estaAbierto, restoId){
-  restoActual = { resto_nombre: nombre, resto_emoji: emoji, resto_cat: cat, resto_id: restoId }
-  document.getElementById('login-emoji').textContent = emoji
+function seleccionarResto(nombre, emoji, cat, estaAbierto, restoId, logoUrl){
+  restoActual = { resto_nombre:nombre, resto_emoji:emoji, resto_cat:cat, resto_id:restoId, resto_logo:logoUrl }
+  var wrap = document.getElementById('login-emoji-wrap')
+  wrap.innerHTML = logoUrl ? '<img class="login-resto-logo" src="'+logoUrl+'"/>' : emoji
   document.getElementById('login-resto-nombre').textContent = nombre
   document.getElementById('login-email').value = ''
   document.getElementById('login-pass').value = ''
@@ -398,7 +452,6 @@ function volverRestos(){
   document.getElementById('screen-restos').style.display = 'flex'
 }
 
-// ─── LOGIN ──────────────────────────────────────────────────────────────────
 async function ingresar(){
   var email = document.getElementById('login-email').value.trim()
   var pass = document.getElementById('login-pass').value
@@ -407,18 +460,19 @@ async function ingresar(){
   if(!email || !pass){ err.style.display='block'; err.textContent='Completá email y contraseña'; return }
   btn.textContent = 'Ingresando...'
   err.style.display = 'none'
-  var result = await sb.auth.signInWithPassword({ email: email, password: pass })
+  var result = await sb.auth.signInWithPassword({ email:email, password:pass })
   if(result.error){ err.style.display='block'; err.textContent='Email o contraseña incorrectos'; btn.textContent='Ingresar →'; return }
   btn.textContent = 'Ingresar →'
-  // Obtener metadata actualizada del usuario
   var meta = result.data.user.user_metadata
   if(meta && meta.resto_id) restauranteId = meta.resto_id
-  mostrarPanel(restoActual.resto_nombre, restoActual.resto_emoji, restoActual.resto_cat)
+  mostrarPanel(restoActual.resto_nombre, restoActual.resto_emoji, restoActual.resto_cat, restoActual.resto_logo||'')
 }
 
-// ─── MOSTRAR PANEL ──────────────────────────────────────────────────────────
-async function mostrarPanel(nombre, emoji, cat){
-  document.getElementById('rest-nombre').textContent = emoji + ' ' + nombre
+async function mostrarPanel(nombre, emoji, cat, logoUrl){
+  // topbar
+  var topLogo = document.getElementById('topbar-logo-wrap')
+  topLogo.innerHTML = logoUrl ? '<img src="'+logoUrl+'" style="width:100%;height:100%;object-fit:cover;border-radius:10px"/>' : emoji
+  document.getElementById('rest-nombre').textContent = nombre
   document.getElementById('local-nombre').textContent = nombre
   document.getElementById('local-cat').textContent = cat
   document.getElementById('screen-login').style.display = 'none'
@@ -426,50 +480,206 @@ async function mostrarPanel(nombre, emoji, cat){
   var p = document.getElementById('screen-panel')
   p.style.display = 'flex'; p.style.flexDirection = 'column'
 
-  // ── FIX PRINCIPAL: intentar múltiples fuentes para restauranteId ──
   if(!restauranteId){
-    // 1. Intentar desde restoActual (pasado al seleccionar desde lista)
     if(restoActual && restoActual.resto_id){
       restauranteId = restoActual.resto_id
     } else {
-      // 2. Intentar desde metadata del usuario logueado
       var session = await sb.auth.getSession()
       var meta = session.data.session && session.data.session.user.user_metadata
-      if(meta && meta.resto_id){
-        restauranteId = meta.resto_id
-      } else {
-        // 3. Fallback: buscar por nombre en la tabla
-        var result = await sb.from('restaurantes').select('id').eq('nombre', nombre).single()
-        if(result.data) restauranteId = result.data.id
-        else console.warn('No se encontró restaurante con nombre:', nombre)
+      if(meta && meta.resto_id){ restauranteId = meta.resto_id }
+      else {
+        var r = await sb.from('restaurantes').select('id').eq('nombre', nombre).single()
+        if(r.data) restauranteId = r.data.id
       }
     }
   }
+  // cargar logo actual en Mi local
+  cargarLogoLocal(logoUrl)
+  // cargar categorías
+  cargarCategorias()
 }
 
 async function cerrarSesion(){
   await sb.auth.signOut()
-  restauranteId = null
-  restoActual = null
+  restauranteId = null; restoActual = null; categoriasLocales = []
   document.getElementById('screen-panel').style.display = 'none'
   document.getElementById('screen-restos').style.display = 'flex'
   cargarListaRestos()
 }
 
-// ─── TABS ───────────────────────────────────────────────────────────────────
+// ─── TABS ─────────────────────────────────────────────────────────────────────
 function switchTab(tab, el){
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active') })
   el.classList.add('active')
-  var tabs = ['pedidos','menu','local']
-  tabs.forEach(function(t){
-    var p = document.getElementById('tab-'+t)
-    if(t === tab){ p.classList.remove('hidden') }
-    else { p.classList.add('hidden') }
+  ;['pedidos','menu','local'].forEach(function(t){
+    document.getElementById('tab-'+t).classList[t===tab?'remove':'add']('hidden')
   })
-  if(tab === 'menu') cargarMenu()
+  if(tab==='menu') cargarMenu()
+  if(tab==='local'){ cargarLogoLocal(); cargarCategorias() }
 }
 
-// ─── CARGAR MENU ────────────────────────────────────────────────────────────
+// ─── LOGO DEL LOCAL ──────────────────────────────────────────────────────────
+async function cargarLogoLocal(urlOverride){
+  if(!restauranteId) return
+  var url = urlOverride
+  if(url === undefined){
+    var r = await sb.from('restaurantes').select('logo_url').eq('id', restauranteId).single()
+    url = r.data && r.data.logo_url ? r.data.logo_url : ''
+  }
+  var wrap = document.getElementById('logo-preview-wrap')
+  if(url){
+    wrap.innerHTML = '<img class="logo-actual" src="'+url+'" alt="logo"/>'
+  } else {
+    wrap.innerHTML = '<div class="logo-placeholder" onclick="document.getElementById(\'logo-input\').click()">🏪</div>'
+  }
+}
+
+async function subirLogo(input){
+  var file = input.files[0]
+  if(!file || !restauranteId) return
+  var ext = file.name.split('.').pop()
+  var fileName = 'logo_'+restauranteId+'.'+ext
+  var msg = document.getElementById('logo-msg')
+  msg.style.display='none'
+  // subir al storage
+  var up = await sb.storage.from('logos').upload(fileName, file, { upsert: true })
+  if(up.error){
+    // intentar bucket productos si logos no existe
+    up = await sb.storage.from('productos').upload('logos/'+fileName, file, { upsert: true })
+    if(up.error){ alert('Error subiendo logo: '+up.error.message); return }
+    var urlR = sb.storage.from('productos').getPublicUrl('logos/'+fileName)
+    var logoUrl = urlR.data.publicUrl
+  } else {
+    var urlR = sb.storage.from('logos').getPublicUrl(fileName)
+    var logoUrl = urlR.data.publicUrl
+  }
+  // guardar en restaurantes
+  await sb.from('restaurantes').update({ logo_url: logoUrl }).eq('id', restauranteId)
+  // actualizar UI
+  document.getElementById('logo-preview-wrap').innerHTML = '<img class="logo-actual" src="'+logoUrl+'" alt="logo"/>'
+  var topLogo = document.getElementById('topbar-logo-wrap')
+  topLogo.innerHTML = '<img src="'+logoUrl+'" style="width:100%;height:100%;object-fit:cover;border-radius:10px"/>'
+  msg.style.display='block'
+  setTimeout(function(){ msg.style.display='none' }, 2000)
+}
+
+// ─── CATEGORÍAS ──────────────────────────────────────────────────────────────
+async function cargarCategorias(){
+  if(!restauranteId) return
+  var r = await sb.from('restaurantes').select('categorias_menu').eq('id', restauranteId).single()
+  if(r.data && r.data.categorias_menu){
+    categoriasLocales = r.data.categorias_menu
+  } else {
+    // auto-detectar desde productos existentes
+    var p = await sb.from('productos').select('categoria').eq('restaurante_id', restauranteId)
+    var found = []
+    if(p.data) p.data.forEach(function(x){ if(x.categoria && !found.includes(x.categoria)) found.push(x.categoria) })
+    categoriasLocales = found.length ? found : []
+  }
+  renderCatsChips()
+  renderCatsSugeridas()
+  renderCatSelectorModal()
+}
+
+function renderCatsChips(){
+  var wrap = document.getElementById('cats-chips')
+  if(!categoriasLocales.length){
+    wrap.innerHTML = '<span style="font-size:12px;color:#ccc;padding:4px">Sin categorías. Agregá una abajo.</span>'
+    return
+  }
+  wrap.innerHTML = ''
+  categoriasLocales.forEach(function(cat, i){
+    var chip = document.createElement('div')
+    chip.className = 'cat-chip'
+    chip.draggable = true
+    chip.dataset.i = i
+    chip.innerHTML = '☰ '+cat+' <span class="cat-chip-del" onclick="eliminarCategoria('+i+')">✕</span>'
+    chip.addEventListener('dragstart', function(){ chip.classList.add('dragging') })
+    chip.addEventListener('dragend', function(){ chip.classList.remove('dragging'); renderCatsChips() })
+    chip.addEventListener('dragover', function(e){
+      e.preventDefault()
+      var dragging = wrap.querySelector('.dragging')
+      if(dragging && dragging !== chip){
+        var all = [...wrap.querySelectorAll('.cat-chip')]
+        var fromI = parseInt(dragging.dataset.i)
+        var toI = parseInt(chip.dataset.i)
+        var moved = categoriasLocales.splice(fromI,1)[0]
+        categoriasLocales.splice(toI,0,moved)
+        renderCatsChips()
+      }
+    })
+    wrap.appendChild(chip)
+  })
+}
+
+function renderCatsSugeridas(){
+  var wrap = document.getElementById('cats-sugeridas-wrap')
+  var disponibles = CATS_SUGERIDAS.filter(function(c){ return !categoriasLocales.includes(c) })
+  wrap.innerHTML = disponibles.map(function(c){
+    return '<button class="cat-sugerida-btn" onclick="agregarCategoriaDesde(\''+c+'\')">+ '+c+'</button>'
+  }).join('')
+}
+
+function renderCatSelectorModal(){
+  var wrap = document.getElementById('cat-selector-chips')
+  wrap.innerHTML = categoriasLocales.map(function(c){
+    return '<div class="cat-sel-chip" onclick="seleccionarCatChip(this,\''+escQ(c)+'\')">'+c+'</div>'
+  }).join('')
+}
+
+function seleccionarCatChip(el, cat){
+  document.querySelectorAll('.cat-sel-chip').forEach(function(c){ c.classList.remove('selected') })
+  el.classList.add('selected')
+  document.getElementById('prod-cat').value = cat
+}
+
+function sincronizarCatInput(){
+  var val = document.getElementById('prod-cat').value
+  document.querySelectorAll('.cat-sel-chip').forEach(function(c){
+    c.classList.toggle('selected', c.textContent === val)
+  })
+}
+
+function agregarCategoria(){
+  var input = document.getElementById('nueva-cat-input')
+  var val = input.value.trim()
+  if(!val) return
+  if(!categoriasLocales.includes(val)){
+    categoriasLocales.push(val)
+    renderCatsChips()
+    renderCatsSugeridas()
+    renderCatSelectorModal()
+  }
+  input.value = ''
+}
+
+function agregarCategoriaDesde(cat){
+  if(!categoriasLocales.includes(cat)){
+    categoriasLocales.push(cat)
+    renderCatsChips()
+    renderCatsSugeridas()
+    renderCatSelectorModal()
+  }
+}
+
+function eliminarCategoria(i){
+  categoriasLocales.splice(i,1)
+  renderCatsChips()
+  renderCatsSugeridas()
+  renderCatSelectorModal()
+}
+
+async function guardarCategorias(){
+  if(!restauranteId) return
+  var r = await sb.from('restaurantes').update({ categorias_menu: categoriasLocales }).eq('id', restauranteId)
+  var msg = document.getElementById('cats-msg-ok')
+  if(r.error){ msg.style.color='#E24B4A'; msg.textContent='Error guardando' }
+  else { msg.style.color='#2D6A2D'; msg.textContent='✓ Categorías guardadas' }
+  msg.style.display='block'
+  setTimeout(function(){ msg.style.display='none' }, 2000)
+}
+
+// ─── MENU ─────────────────────────────────────────────────────────────────────
 async function cargarMenu(){
   var lista = document.getElementById('lista-menu')
   lista.innerHTML = '<div class="loading-text">Cargando menú...</div>'
@@ -478,33 +688,35 @@ async function cargarMenu(){
   if(result.error){ lista.innerHTML = '<div class="loading-text">Error: '+result.error.message+'</div>'; return }
   var productos = result.data
   if(!productos.length){
-    lista.innerHTML = '<div class="loading-text">No hay productos. Agregá el primero!</div><button class="btn-add-prod" onclick="abrirModal(\'modal-producto\')">+ Agregar primer producto</button>'
+    lista.innerHTML = '<div class="loading-text">No hay productos. Agregá el primero!</div><button class="btn-add-prod" onclick="abrirNuevoProducto()">+ Agregar primer producto</button>'
     return
   }
+  // ordenar por orden de categoriasLocales
   var cats = {}
+  var ordenCats = categoriasLocales.length ? categoriasLocales : []
   productos.forEach(function(p){
     var cat = p.categoria || 'Sin categoría'
     if(!cats[cat]) cats[cat] = []
     cats[cat].push(p)
   })
+  // primero las que están en el orden, luego el resto
+  var catKeys = []
+  ordenCats.forEach(function(c){ if(cats[c]) catKeys.push(c) })
+  Object.keys(cats).forEach(function(c){ if(!catKeys.includes(c)) catKeys.push(c) })
+
   var html = ''
   var hoy = new Date().toISOString().split('T')[0]
-  Object.keys(cats).forEach(function(cat){
-    html += '<div class="cat-label">'+cat+'</div>'
+  catKeys.forEach(function(cat){
+    html += '<div class="cat-label"><span class="cat-label-text">'+cat+'</span></div>'
     cats[cat].forEach(function(p){
       var tienePromo = p.promocion_activa && p.precio_promocion && p.promocion_inicio <= hoy && p.promocion_fin >= hoy
       var descuento = tienePromo ? Math.round((1 - p.precio_promocion/p.precio)*100) : 0
       html += '<div class="prod-card">'
       html += '<div class="prod-img-wrap">'
-      if(p.imagen_url){
-        html += '<img class="prod-img" src="'+p.imagen_url+'" alt="'+p.nombre+'"/>'
-      } else {
-        html += '<div class="prod-img-placeholder">🍽</div>'
-      }
+      html += p.imagen_url ? '<img class="prod-img" src="'+p.imagen_url+'" alt="'+p.nombre+'"/>' : '<div class="prod-img-placeholder">🍽</div>'
       if(tienePromo) html += '<div class="prod-badge-promo">🔥 '+descuento+'% OFF</div>'
       if(!p.disponible) html += '<div class="prod-badge-nodisponible">NO DISPONIBLE</div>'
-      html += '</div>'
-      html += '<div class="prod-body">'
+      html += '</div><div class="prod-body">'
       html += '<div class="prod-nombre">'+p.nombre+'</div>'
       if(p.descripcion) html += '<div class="prod-desc">'+p.descripcion+'</div>'
       html += '<div class="prod-precios">'
@@ -516,38 +728,37 @@ async function cargarMenu(){
       }
       html += '</div>'
       if(tienePromo) html += '<div class="prod-promo-info">Promo hasta '+p.promocion_fin+'</div>'
-      html += '</div>'
-      html += '<div class="prod-actions">'
-      html += '<button class="btn-sm btn-sm-naranja" onclick="editarProducto('+JSON.stringify(p).replace(/"/g,"'")+'  )">✏️ Editar</button>'
-      if(p.disponible){
-        html += '<button class="btn-sm btn-sm-gris" onclick="toggleDisponible(\''+p.id+'\',false)">⏸ Pausar</button>'
-      } else {
-        html += '<button class="btn-sm btn-sm-verde" onclick="toggleDisponible(\''+p.id+'\',true)">▶️ Activar</button>'
-      }
+      html += '</div><div class="prod-actions">'
+      html += '<button class="btn-sm btn-sm-naranja" onclick=\'editarProducto('+JSON.stringify(p)+')\'>✏️ Editar</button>'
+      html += p.disponible
+        ? '<button class="btn-sm btn-sm-gris" onclick="toggleDisponible(\''+p.id+'\',false)">⏸ Pausar</button>'
+        : '<button class="btn-sm btn-sm-verde" onclick="toggleDisponible(\''+p.id+'\',true)">▶️ Activar</button>'
       html += '<button class="btn-sm btn-sm-rojo" onclick="eliminarProducto(\''+p.id+'\')">🗑</button>'
       html += '</div></div>'
     })
-    html += '<button class="btn-add-prod" onclick="abrirModalCategoria(\''+cat+'\')">+ Agregar a '+cat+'</button>'
+    html += '<button class="btn-add-prod" onclick="abrirModalCategoria(\''+escQ(cat)+'\')">+ Agregar a '+cat+'</button>'
   })
-  html += '<button class="btn-add-prod" onclick="abrirModal(\'modal-producto\')">+ Nueva categoría / producto</button>'
+  html += '<button class="btn-add-prod" onclick="abrirNuevoProducto()">+ Nueva categoría / producto</button>'
   lista.innerHTML = html
 }
 
-// ─── FOTO ───────────────────────────────────────────────────────────────────
+function abrirNuevoProducto(){
+  limpiarModalProducto()
+  renderCatSelectorModal()
+  abrirModal('modal-producto')
+}
+
 function previewFoto(input){
-  var file = input.files[0]
-  if(!file) return
+  var file = input.files[0]; if(!file) return
   var reader = new FileReader()
   reader.onload = function(e){
     var preview = document.getElementById('foto-preview')
-    preview.src = e.target.result
-    preview.style.display = 'block'
+    preview.src = e.target.result; preview.style.display = 'block'
     document.querySelector('.foto-placeholder').style.display = 'none'
   }
   reader.readAsDataURL(file)
 }
 
-// ─── GUARDAR PRODUCTO ───────────────────────────────────────────────────────
 async function guardarProducto(){
   var nombre = document.getElementById('prod-nombre').value.trim()
   var desc = document.getElementById('prod-desc').value.trim()
@@ -556,7 +767,6 @@ async function guardarProducto(){
   var msgOk = document.getElementById('msg-prod-ok')
   var msgErr = document.getElementById('msg-prod-err')
   msgOk.style.display='none'; msgErr.style.display='none'
-
   if(!nombre || !precio){ msgErr.style.display='block'; msgErr.textContent='Completá nombre y precio'; return }
   if(!restauranteId){ msgErr.style.display='block'; msgErr.textContent='Error: no se encontró el restaurante. Cerrá sesión y volvé a ingresar.'; return }
 
@@ -566,98 +776,89 @@ async function guardarProducto(){
     var file = fotoInput.files[0]
     var ext = file.name.split('.').pop()
     var fileName = 'prod_'+Date.now()+'.'+ext
-    var uploadResult = await sb.storage.from('productos').upload(fileName, file)
-    if(uploadResult.error){ msgErr.style.display='block'; msgErr.textContent='Error subiendo foto: '+uploadResult.error.message; return }
-    var urlResult = sb.storage.from('productos').getPublicUrl(fileName)
-    imagenUrl = urlResult.data.publicUrl
+    var up = await sb.storage.from('productos').upload(fileName, file)
+    if(up.error){ msgErr.style.display='block'; msgErr.textContent='Error subiendo foto: '+up.error.message; return }
+    imagenUrl = sb.storage.from('productos').getPublicUrl(fileName).data.publicUrl
   }
 
-  var data = {
-    restaurante_id: restauranteId,
-    nombre: nombre,
-    descripcion: desc,
-    categoria: cat || 'General',
-    precio: precio,
-    disponible: true
-  }
+  var data = { restaurante_id:restauranteId, nombre:nombre, descripcion:desc, categoria:cat||'General', precio:precio, disponible:true }
   if(imagenUrl) data.imagen_url = imagenUrl
   if(promoActiva){
     data.promocion_activa = true
-    data.precio_promocion = parseFloat(document.getElementById('prod-precio-promo').value) || null
-    data.promocion_inicio = document.getElementById('prod-promo-inicio').value || null
-    data.promocion_fin = document.getElementById('prod-promo-fin').value || null
+    data.precio_promocion = parseFloat(document.getElementById('prod-precio-promo').value)||null
+    data.promocion_inicio = document.getElementById('prod-promo-inicio').value||null
+    data.promocion_fin = document.getElementById('prod-promo-fin').value||null
   }
 
   var prodId = document.getElementById('prod-id').value
-  var result
-  if(prodId){
-    result = await sb.from('productos').update(data).eq('id', prodId)
-  } else {
-    result = await sb.from('productos').insert([data])
-  }
+  var result = prodId
+    ? await sb.from('productos').update(data).eq('id', prodId)
+    : await sb.from('productos').insert([data])
 
   if(result.error){ msgErr.style.display='block'; msgErr.textContent='Error: '+result.error.message; return }
+
+  // si la categoría es nueva, agregarla a la lista local
+  if(cat && !categoriasLocales.includes(cat)){
+    categoriasLocales.push(cat)
+    await sb.from('restaurantes').update({ categorias_menu: categoriasLocales }).eq('id', restauranteId)
+  }
+
   msgOk.style.display='block'; msgOk.textContent='✓ Producto guardado correctamente'
   setTimeout(function(){ cerrarModal('modal-producto'); cargarMenu() }, 1000)
 }
 
 async function toggleDisponible(id, disponible){
-  await sb.from('productos').update({ disponible: disponible }).eq('id', id)
-  cargarMenu()
+  await sb.from('productos').update({ disponible:disponible }).eq('id', id); cargarMenu()
 }
-
 async function eliminarProducto(id){
   if(!confirm('¿Eliminar este producto?')) return
-  await sb.from('productos').delete().eq('id', id)
-  cargarMenu()
+  await sb.from('productos').delete().eq('id', id); cargarMenu()
 }
 
 function abrirModalCategoria(cat){
   limpiarModalProducto()
+  renderCatSelectorModal()
   document.getElementById('prod-cat').value = cat
   document.getElementById('modal-prod-titulo').textContent = 'Nuevo producto en '+cat
+  // marcar chip seleccionado
+  document.querySelectorAll('.cat-sel-chip').forEach(function(c){ c.classList.toggle('selected', c.textContent===cat) })
   abrirModal('modal-producto')
 }
 
 function editarProducto(p){
   limpiarModalProducto()
+  renderCatSelectorModal()
   document.getElementById('modal-prod-titulo').textContent = 'Editar producto'
   document.getElementById('prod-id').value = p.id
-  document.getElementById('prod-nombre').value = p.nombre || ''
-  document.getElementById('prod-desc').value = p.descripcion || ''
-  document.getElementById('prod-cat').value = p.categoria || ''
-  document.getElementById('prod-precio').value = p.precio || ''
+  document.getElementById('prod-nombre').value = p.nombre||''
+  document.getElementById('prod-desc').value = p.descripcion||''
+  document.getElementById('prod-cat').value = p.categoria||''
+  document.getElementById('prod-precio').value = p.precio||''
+  // marcar chip
+  document.querySelectorAll('.cat-sel-chip').forEach(function(c){ c.classList.toggle('selected', c.textContent===p.categoria) })
   if(p.imagen_url){
     var preview = document.getElementById('foto-preview')
-    preview.src = p.imagen_url
-    preview.style.display = 'block'
+    preview.src = p.imagen_url; preview.style.display = 'block'
     document.querySelector('.foto-placeholder').style.display = 'none'
   }
   if(p.promocion_activa){
     togglePromo()
-    document.getElementById('prod-precio-promo').value = p.precio_promocion || ''
-    document.getElementById('prod-promo-inicio').value = p.promocion_inicio || ''
-    document.getElementById('prod-promo-fin').value = p.promocion_fin || ''
+    document.getElementById('prod-precio-promo').value = p.precio_promocion||''
+    document.getElementById('prod-promo-inicio').value = p.promocion_inicio||''
+    document.getElementById('prod-promo-fin').value = p.promocion_fin||''
   }
   abrirModal('modal-producto')
 }
 
 function limpiarModalProducto(){
-  document.getElementById('prod-id').value = ''
-  document.getElementById('prod-nombre').value = ''
-  document.getElementById('prod-desc').value = ''
-  document.getElementById('prod-cat').value = ''
-  document.getElementById('prod-precio').value = ''
-  document.getElementById('prod-precio-promo').value = ''
-  document.getElementById('prod-promo-inicio').value = ''
-  document.getElementById('prod-promo-fin').value = ''
+  ;['prod-id','prod-nombre','prod-desc','prod-cat','prod-precio','prod-precio-promo','prod-promo-inicio','prod-promo-fin'].forEach(function(id){ document.getElementById(id).value='' })
   document.getElementById('foto-input').value = ''
-  var preview = document.getElementById('foto-preview')
-  preview.style.display = 'none'
+  var preview = document.getElementById('foto-preview'); preview.style.display='none'
   document.querySelector('.foto-placeholder').style.display = 'flex'
-  document.getElementById('msg-prod-ok').style.display = 'none'
-  document.getElementById('msg-prod-err').style.display = 'none'
+  document.getElementById('msg-prod-ok').style.display='none'
+  document.getElementById('msg-prod-err').style.display='none'
   document.getElementById('modal-prod-titulo').textContent = 'Nuevo producto'
+  document.querySelectorAll('.cat-sel-chip').forEach(function(c){ c.classList.remove('selected') })
   if(promoActiva) togglePromo()
 }
 
@@ -666,43 +867,28 @@ function togglePromo(){
   var track = document.getElementById('promo-toggle-track')
   var thumb = document.getElementById('promo-toggle-thumb')
   var fields = document.getElementById('promo-fields')
-  if(promoActiva){
-    track.style.background = '#FF4D00'; thumb.style.left = '23px'
-    fields.style.display = 'block'
-  } else {
-    track.style.background = '#ddd'; thumb.style.left = '3px'
-    fields.style.display = 'none'
-  }
+  if(promoActiva){ track.style.background='#FF4D00'; thumb.style.left='23px'; fields.style.display='block' }
+  else { track.style.background='#ddd'; thumb.style.left='3px'; fields.style.display='none' }
 }
 
 function toggleAbierto(){
   abierto = !abierto
-  var track = document.getElementById('toggle-track')
-  var thumb = document.getElementById('toggle-thumb')
-  var dot = document.getElementById('estado-dot')
-  var texto = document.getElementById('estado-texto')
-  var sub = document.getElementById('toggle-sub-text')
-  if(abierto){
-    track.style.background='#2D6A2D'; thumb.style.left='23px'
-    dot.style.background='#2D6A2D'; texto.style.color='#2D6A2D'
-    texto.textContent='Abierto'; sub.textContent='Recibiendo pedidos'
-  } else {
-    track.style.background='#ddd'; thumb.style.left='3px'
-    dot.style.background='#ccc'; texto.style.color='#ccc'
-    texto.textContent='Cerrado'; sub.textContent='Local pausado'
-  }
+  var track=document.getElementById('toggle-track'), thumb=document.getElementById('toggle-thumb')
+  var dot=document.getElementById('estado-dot'), texto=document.getElementById('estado-texto')
+  var sub=document.getElementById('toggle-sub-text')
+  if(abierto){ track.style.background='#2D6A2D'; thumb.style.left='23px'; dot.style.background='#2D6A2D'; texto.style.color='#2D6A2D'; texto.textContent='Abierto'; sub.textContent='Recibiendo pedidos' }
+  else { track.style.background='#ddd'; thumb.style.left='3px'; dot.style.background='#ccc'; texto.style.color='#ccc'; texto.textContent='Cerrado'; sub.textContent='Local pausado' }
 }
 
 function togglePass(inputId, ojoId){
-  var input = document.getElementById(inputId)
-  var ojo = document.getElementById(ojoId)
-  if(input.type === 'password'){ input.type = 'text'; ojo.textContent = '🙈' }
-  else { input.type = 'password'; ojo.textContent = '👁' }
+  var input=document.getElementById(inputId), ojo=document.getElementById(ojoId)
+  if(input.type==='password'){ input.type='text'; ojo.textContent='🙈' }
+  else { input.type='password'; ojo.textContent='👁' }
 }
 
 function abrirModal(id){ document.getElementById(id).classList.remove('hidden') }
 function cerrarModal(id){ document.getElementById(id).classList.add('hidden') }
-function cerrarModalBg(e, id){ if(e.target.id === id) cerrarModal(id) }
+function cerrarModalBg(e,id){ if(e.target.id===id) cerrarModal(id) }
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', function(){ navigator.serviceWorker.register('./sw.js') })
