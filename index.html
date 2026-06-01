@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="ALL Resto"/>
 <meta name="theme-color" content="#FF4D00"/>
 <link rel="manifest" href="manifest.json"/>
-<title>ALL — App Restaurante v1.2</title>
+<title>ALL — App Restaurante v1.3</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -158,6 +158,13 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 .promo-fields{margin-top:14px;display:none}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .hidden{display:none !important}
+.pedido-estado-btns{display:flex;gap:6px;flex-wrap:wrap;padding:10px 14px;border-top:1px solid #FFE8DC}
+.btn-estado{padding:7px 14px;border-radius:20px;border:none;font-size:11px;font-weight:700;cursor:pointer}
+.btn-preparar{background:#FFF9E5;color:#B8860B}
+.btn-enviar{background:#E3F2FD;color:#1565C0}
+.btn-entregar{background:#E8F5E9;color:#2D6A2D}
+.btn-cancelar{background:#FFF0F0;color:#E24B4A}
+.pedido-cliente-info{font-size:11px;color:#888;margin-top:2px}
 .loading-text{text-align:center;padding:20px;color:#888;font-size:13px}
 
 /* selector categoría en modal */
@@ -183,7 +190,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
   <div class="restos-body">
     <div class="restos-label">Nuestros restaurantes</div>
     <div id="lista-restos"><div class="loading-text">Cargando restaurantes...</div></div>
-    <div class="version">ALL App Restaurante v1.2</div>
+    <div class="version">ALL App Restaurante v1.3</div>
   </div>
 </div>
 
@@ -214,7 +221,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     <div class="topbar-logo" id="topbar-logo-wrap">🍽</div>
     <div>
       <div class="topbar-name" id="rest-nombre">Restaurante</div>
-      <div class="topbar-sub">Panel del local · v1.2</div>
+      <div class="topbar-sub">Panel del local · v1.3</div>
     </div>
     <div class="estado-badge">
       <div class="dot" id="estado-dot" style="background:#2D6A2D"></div>
@@ -239,12 +246,12 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
       </div>
     </div>
     <div class="stats-row">
-      <div class="stat" style="background:#FF4D00"><div class="stat-val" style="color:#fff">0</div><div class="stat-label" style="color:rgba(255,255,255,0.7)">Nuevos</div></div>
-      <div class="stat"><div class="stat-val">0</div><div class="stat-label">Hoy</div></div>
-      <div class="stat"><div class="stat-val">$0</div><div class="stat-label">Ingresos</div></div>
+      <div class="stat" style="background:#FF4D00"><div class="stat-val" style="color:#fff" id="stat-nuevos">0</div><div class="stat-label" style="color:rgba(255,255,255,0.7)">Nuevos</div></div>
+      <div class="stat"><div class="stat-val" id="stat-hoy">0</div><div class="stat-label">Hoy</div></div>
+      <div class="stat"><div class="stat-val" id="stat-ingresos">$0</div><div class="stat-label">Ingresos</div></div>
     </div>
     <div class="section-title">Pedidos activos</div>
-    <div class="loading-text">Sin pedidos activos</div>
+    <div id="lista-pedidos-activos"><div class="loading-text">Cargando pedidos...</div></div>
   </div>
 
   <!-- TAB MENU -->
@@ -288,7 +295,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     </div>
 
     <button class="btn-main btn-dark" style="margin-top:6px" onclick="cerrarSesion()">Cerrar sesión</button>
-    <div class="version">ALL App Restaurante v1.2</div>
+    <div class="version">ALL App Restaurante v1.3</div>
   </div>
 </div>
 
@@ -447,6 +454,7 @@ async function mostrarPanel(nombre,emoji,cat,logoUrl){
   }
   cargarLogoLocal(logoUrl)
   cargarCategorias()
+  iniciarPollingPedidos()
 }
 
 async function cerrarSesion(){
@@ -466,6 +474,7 @@ function switchTab(tab,el){
   })
   if(tab==='menu') cargarMenu()
   if(tab==='local'){ cargarLogoLocal(); cargarCategorias() }
+  if(tab==='pedidos') iniciarPollingPedidos()
 }
 
 // ─── LOGO ─────────────────────────────────────────────────────────────────────
@@ -646,8 +655,8 @@ async function cargarMenu(){
       html+='<button class="btn-sm btn-sm-rojo" onclick="eliminarProducto(\''+p.id+'\')">🗑</button>'
       // flechas orden
       html+='<div class="prod-orden">'
-      if(idx>0) html+='<button class="btn-sm btn-sm-orden" onclick="moverProducto(\''+p.id+'\',\''+cat+'\','+(idx-1)+','+idx+')">↑</button>'
-      if(idx<prods.length-1) html+='<button class="btn-sm btn-sm-orden" onclick="moverProducto(\''+p.id+'\',\''+cat+'\','+(idx+1)+','+idx+')">↓</button>'
+      if(idx>0) html+='<button class="btn-sm btn-sm-orden" onclick="moverProducto(this,\''+p.id+'\',\''+cat+'\','+(idx-1)+','+idx+')">&#8593;</button>'
+      if(idx<prods.length-1){var ni=idx+1; html+='<button class="btn-sm btn-sm-orden" onclick="moverProducto(this,\''+p.id+'\',\''+cat+'\','+ni+','+idx+')">&#8595;</button>'}
       html+='</div>'
       html+='</div></div>'
     })
@@ -805,6 +814,95 @@ function toggleAbierto(){
 function togglePass(inputId,ojoId){
   var input=document.getElementById(inputId), ojo=document.getElementById(ojoId)
   if(input.type==='password'){ input.type='text'; ojo.textContent='🙈' } else { input.type='password'; ojo.textContent='👁' }
+}
+
+// ─── PEDIDOS EN TIEMPO REAL ──────────────────────────────────────────────────
+var pedidosInterval = null
+
+async function cargarPedidos(){
+  if(!restauranteId) return
+  var hoy = new Date().toISOString().split('T')[0]
+  var result = await sb.from('pedidos')
+    .select('*,perfiles(nombre,telefono)')
+    .eq('restaurante_id', restauranteId)
+    .in('estado', ['nuevo','preparando','camino'])
+    .order('created_at', {ascending: true})
+
+  var todosHoy = await sb.from('pedidos')
+    .select('total,estado')
+    .eq('restaurante_id', restauranteId)
+    .gte('created_at', hoy+'T00:00:00')
+
+  // stats
+  var pedidosHoy = todosHoy.data || []
+  var nuevos = (result.data||[]).filter(function(p){ return p.estado==='nuevo' }).length
+  var ingresos = pedidosHoy.filter(function(p){ return p.estado==='entregado' }).reduce(function(s,p){ return s+p.total },0)
+  document.getElementById('stat-nuevos').textContent = nuevos
+  document.getElementById('stat-hoy').textContent = pedidosHoy.length
+  document.getElementById('stat-ingresos').textContent = '$'+Math.round(ingresos/1000)+'k'
+
+  var lista = document.getElementById('lista-pedidos-activos')
+  if(result.error){ lista.innerHTML='<div class="loading-text">Error cargando pedidos</div>'; return }
+  var pedidos = result.data || []
+  if(!pedidos.length){ lista.innerHTML='<div class="loading-text">Sin pedidos activos 🎉</div>'; return }
+
+  var tagClass = {nuevo:'tag-nuevo', preparando:'tag-prep', camino:'tag-prep', entregado:'tag-ok'}
+  var tagLabel = {nuevo:'NUEVO', preparando:'PREPARANDO', camino:'EN CAMINO', entregado:'LISTO'}
+
+  lista.innerHTML = pedidos.map(function(p){
+    var items = (p.items||[]).map(function(i){ return i.qty+'× '+i.nombre }).join('<br>')
+    var hora = new Date(p.created_at).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})
+    var clienteNombre = p.perfiles ? p.perfiles.nombre : 'Cliente'
+    var clienteTel = p.perfiles && p.perfiles.telefono ? ' · '+p.perfiles.telefono : ''
+    var html = '<div class="pedido-card">'
+    html += '<div class="pedido-head">'
+    html += '<div><div style="display:flex;align-items:center;gap:6px">'
+    html += '<span class="tag '+(tagClass[p.estado]||'tag-nuevo')+'">'+(tagLabel[p.estado]||p.estado.toUpperCase())+'</span>'
+    html += '</div>'
+    html += '<div class="pedido-cliente">'+clienteNombre+'</div>'
+    html += '<div class="pedido-cliente-info">'+clienteTel+'</div>'
+    html += '</div><div class="pedido-hora">'+hora+'</div></div>'
+    html += '<div class="pedido-items">'+items+'</div>'
+    // desglose
+    html += '<div style="padding:8px 14px;font-size:12px;color:#888;border-bottom:1px solid #FFE8DC">'
+    html += '📍 '+p.direccion_entrega
+    html += ' &nbsp;·&nbsp; 💳 '+p.metodo_pago
+    if(p.notas) html += '<br>📝 '+p.notas
+    html += '</div>'
+    html += '<div class="pedido-footer">'
+    html += '<div><div class="pedido-total">$'+Number(p.total).toLocaleString('es-AR')+'</div>'
+    if(p.costo_envio>0) html += '<div style="font-size:11px;color:#888">Envío: $'+Number(p.costo_envio).toLocaleString('es-AR')+'</div>'
+    if(p.propina>0) html += '<div style="font-size:11px;color:#2D6A2D">Propina: $'+Number(p.propina).toLocaleString('es-AR')+'</div>'
+    html += '</div>'
+    // botones según estado
+    html += '<div style="display:flex;gap:6px;flex-wrap:wrap">'
+    if(p.estado==='nuevo'){
+      html += '<button class="btn-estado btn-preparar" data-id="'+p.id+'" data-est="preparando" onclick="cambiarEstadoPedido(this.dataset.id,this.dataset.est)">👨‍🍳 Preparar</button>'
+      html += '<button class="btn-estado btn-cancelar" data-id="'+p.id+'" data-est="cancelado" onclick="cambiarEstadoPedido(this.dataset.id,this.dataset.est)">✕ Cancelar</button>'
+    }
+    if(p.estado==='preparando'){
+      html += '<button class="btn-estado btn-enviar" data-id="'+p.id+'" data-est="camino" onclick="cambiarEstadoPedido(this.dataset.id,this.dataset.est)">🏍 Enviar</button>'
+    }
+    if(p.estado==='camino'){
+      html += '<button class="btn-estado btn-entregar" data-id="'+p.id+'" data-est="entregado" onclick="cambiarEstadoPedido(this.dataset.id,this.dataset.est)">✅ Entregado</button>'
+    }
+    if(p.ticket_url){
+      html += '<button class="btn-estado" style="background:#E3F2FD;color:#1565C0" data-url="'+p.ticket_url+'" onclick="window.open(this.dataset.url)">&#128206; Comprobante</button>'
+    }
+    html += '</div></div></div>'
+    return html
+  }).join('')
+}
+
+async function cambiarEstadoPedido(pedidoId, nuevoEstado){
+  await sb.from('pedidos').update({estado:nuevoEstado}).eq('id',pedidoId)
+  cargarPedidos()
+}
+
+function iniciarPollingPedidos(){
+  cargarPedidos()
+  if(pedidosInterval) clearInterval(pedidosInterval)
+  pedidosInterval = setInterval(cargarPedidos, 10000)
 }
 
 function abrirModal(id){ document.getElementById(id).classList.remove('hidden') }
