@@ -647,7 +647,7 @@ async function cargarMenu(){
       // flechas orden
       html+='<div class="prod-orden">'
       if(idx>0) html+='<button class="btn-sm btn-sm-orden" onclick="moverProducto(\''+p.id+'\',\''+cat+'\','+(idx-1)+','+idx+')">↑</button>'
-      if(idx<prods.length-1) html+='<button class="btn-sm btn-sm-orden" onclick="moverProducto(\''+p.id+'\',\''+cat+'\',"+(idx+1)+','+idx+')">↓</button>'
+      if(idx<prods.length-1) html+='<button class="btn-sm btn-sm-orden" onclick="moverProducto(\''+p.id+'\',\''+cat+'\','+(idx+1)+','+idx+')">↓</button>'
       html+='</div>'
       html+='</div></div>'
     })
