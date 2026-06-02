@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="ALL Resto"/>
 <meta name="theme-color" content="#FF4D00"/>
 <link rel="manifest" href="manifest.json"/>
-<title>ALL — App Restaurante v1.3</title>
+<title>ALL — App Restaurante v1.4</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -190,7 +190,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
   <div class="restos-body">
     <div class="restos-label">Nuestros restaurantes</div>
     <div id="lista-restos"><div class="loading-text">Cargando restaurantes...</div></div>
-    <div class="version">ALL App Restaurante v1.3</div>
+    <div class="version">ALL App Restaurante v1.4</div>
   </div>
 </div>
 
@@ -221,7 +221,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     <div class="topbar-logo" id="topbar-logo-wrap">🍽</div>
     <div>
       <div class="topbar-name" id="rest-nombre">Restaurante</div>
-      <div class="topbar-sub">Panel del local · v1.3</div>
+      <div class="topbar-sub">Panel del local · v1.4</div>
     </div>
     <div class="estado-badge">
       <div class="dot" id="estado-dot" style="background:#2D6A2D"></div>
@@ -294,8 +294,28 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
       <div id="cats-msg-ok" style="font-size:11px;color:#2D6A2D;margin-top:8px;text-align:center;display:none">✓ Guardado</div>
     </div>
 
+    <!-- RASPADITA -->
+    <div class="cats-section" id="raspadita-section">
+      <div class="cats-title">
+        <span>🎰 Raspadita virtual</span>
+        <div class="toggle-track" id="rasp-toggle" style="background:#ddd;width:44px;height:26px" onclick="toggleRaspadita()">
+          <div class="toggle-thumb" id="rasp-thumb" style="left:3px;width:20px;height:20px"></div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#888;margin-bottom:12px">Los clientes ganan una raspadita al completar cada pedido.</div>
+      <div id="premios-lista"></div>
+      <div class="cat-add-row">
+        <input type="text" class="cat-add-input" id="premio-nombre-input" placeholder="Premio (ej: 10% off, Bebida gratis)"/>
+        <input type="number" class="cat-add-input" id="premio-prob-input" placeholder="%" style="width:60px;flex:none"/>
+        <button class="cat-add-btn" onclick="agregarPremio()">+</button>
+      </div>
+      <div style="font-size:11px;color:#aaa;margin-top:6px">El % indica la probabilidad de ganar ese premio. Podés poner "Sin premio" con 70% para que no siempre ganen.</div>
+      <button class="btn-main" style="margin-top:14px" onclick="guardarRaspadita()">Guardar raspadita</button>
+      <div id="rasp-msg" style="font-size:11px;color:#2D6A2D;margin-top:8px;text-align:center;display:none">✓ Guardado</div>
+    </div>
+
     <button class="btn-main btn-dark" style="margin-top:6px" onclick="cerrarSesion()">Cerrar sesión</button>
-    <div class="version">ALL App Restaurante v1.3</div>
+    <div class="version">ALL App Restaurante v1.4</div>
   </div>
 </div>
 
@@ -344,6 +364,11 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
           <div class="row2">
             <div><div style="font-size:11px;color:#888;margin-bottom:5px">Desde</div><input type="date" id="prod-promo-inicio" class="input" style="margin-bottom:0"/></div>
             <div><div style="font-size:11px;color:#888;margin-bottom:5px">Hasta</div><input type="date" id="prod-promo-fin" class="input" style="margin-bottom:0"/></div>
+          </div>
+          <div class="field-label" style="margin-top:12px">Horario (opcional)</div>
+          <div class="row2">
+            <div><div style="font-size:11px;color:#888;margin-bottom:5px">Hora inicio</div><input type="time" id="prod-promo-hora-inicio" class="input" style="margin-bottom:0"/></div>
+            <div><div style="font-size:11px;color:#888;margin-bottom:5px">Hora fin</div><input type="time" id="prod-promo-hora-fin" class="input" style="margin-bottom:0"/></div>
           </div>
         </div>
       </div>
@@ -473,7 +498,7 @@ function switchTab(tab,el){
     document.getElementById('tab-'+t).classList[t===tab?'remove':'add']('hidden')
   })
   if(tab==='menu') cargarMenu()
-  if(tab==='local'){ cargarLogoLocal(); cargarCategorias() }
+  if(tab==='local'){ cargarLogoLocal(); cargarCategorias(); cargarRaspadita() }
   if(tab==='pedidos') iniciarPollingPedidos()
 }
 
@@ -623,7 +648,9 @@ async function cargarMenu(){
     var prods=cats[cat]
     html+='<div class="cat-label">'+cat+'</div>'
     prods.forEach(function(p,idx){
-      var tienePromo=p.promocion_activa&&p.precio_promocion&&p.promocion_inicio<=hoy&&p.promocion_fin>=hoy
+      var ahoraStr=new Date().toTimeString().substring(0,5)
+      var horaOk=(!p.promo_hora_inicio&&!p.promo_hora_fin)||(p.promo_hora_inicio&&p.promo_hora_fin&&ahoraStr>=p.promo_hora_inicio&&ahoraStr<=p.promo_hora_fin)
+      var tienePromo=p.promocion_activa&&p.precio_promocion&&p.promocion_inicio<=hoy&&p.promocion_fin>=hoy&&horaOk
       var desc=tienePromo?Math.round((1-p.precio_promocion/p.precio)*100):0
       var pJson=JSON.stringify(p).replace(/\\/g,'\\\\').replace(/'/g,"\\'")
       html+='<div class="prod-card">'
@@ -731,6 +758,8 @@ async function guardarProducto(){
     data.precio_promocion=parseFloat(document.getElementById('prod-precio-promo').value)||null
     data.promocion_inicio=document.getElementById('prod-promo-inicio').value||null
     data.promocion_fin=document.getElementById('prod-promo-fin').value||null
+    data.promo_hora_inicio=document.getElementById('prod-promo-hora-inicio').value||null
+    data.promo_hora_fin=document.getElementById('prod-promo-hora-fin').value||null
   }
 
   var result=prodId ? await sb.from('productos').update(data).eq('id',prodId) : await sb.from('productos').insert([data])
@@ -780,12 +809,14 @@ function editarProducto(p){
     document.getElementById('prod-precio-promo').value=p.precio_promocion||''
     document.getElementById('prod-promo-inicio').value=p.promocion_inicio||''
     document.getElementById('prod-promo-fin').value=p.promocion_fin||''
+    document.getElementById('prod-promo-hora-inicio').value=p.promo_hora_inicio||''
+    document.getElementById('prod-promo-hora-fin').value=p.promo_hora_fin||''
   }
   abrirModal('modal-producto')
 }
 
 function limpiarModalProducto(){
-  ;['prod-id','prod-nombre','prod-desc','prod-cat','prod-precio','prod-precio-promo','prod-promo-inicio','prod-promo-fin'].forEach(function(id){ document.getElementById(id).value='' })
+  ;['prod-id','prod-nombre','prod-desc','prod-cat','prod-precio','prod-precio-promo','prod-promo-inicio','prod-promo-fin','prod-promo-hora-inicio','prod-promo-hora-fin'].forEach(function(id){ document.getElementById(id).value='' })
   document.getElementById('foto-input').value=''
   var preview=document.getElementById('foto-preview'); preview.style.display='none'
   document.querySelector('.foto-placeholder').style.display='flex'
@@ -896,6 +927,10 @@ async function cargarPedidos(){
 
 async function cambiarEstadoPedido(pedidoId, nuevoEstado){
   await sb.from('pedidos').update({estado:nuevoEstado}).eq('id',pedidoId)
+  if(nuevoEstado==='entregado'){
+    var p = await sb.from('pedidos').select('cliente_id').eq('id',pedidoId).single()
+    if(p.data) await generarRaspadita(pedidoId, p.data.cliente_id)
+  }
   cargarPedidos()
 }
 
@@ -903,6 +938,99 @@ function iniciarPollingPedidos(){
   cargarPedidos()
   if(pedidosInterval) clearInterval(pedidosInterval)
   pedidosInterval = setInterval(cargarPedidos, 10000)
+}
+
+// ─── RASPADITA ───────────────────────────────────────────────────────────────
+var raspaditaActiva = false
+var premiosLocales = []
+var raspaditaConfigId = null
+
+async function cargarRaspadita(){
+  if(!restauranteId) return
+  var r = await sb.from('raspaditas_config').select('*').eq('restaurante_id', restauranteId).single()
+  if(r.data){
+    raspaditaActiva = r.data.activa
+    premiosLocales = r.data.premios || []
+    raspaditaConfigId = r.data.id
+  } else {
+    raspaditaActiva = false; premiosLocales = []
+  }
+  renderRaspaditaToggle()
+  renderPremios()
+}
+
+function renderRaspaditaToggle(){
+  var track = document.getElementById('rasp-toggle')
+  var thumb = document.getElementById('rasp-thumb')
+  if(!track) return
+  if(raspaditaActiva){ track.style.background='#FF4D00'; thumb.style.left='21px' }
+  else { track.style.background='#ddd'; thumb.style.left='3px' }
+}
+
+function toggleRaspadita(){
+  raspaditaActiva = !raspaditaActiva
+  renderRaspaditaToggle()
+}
+
+function renderPremios(){
+  var lista = document.getElementById('premios-lista')
+  if(!lista) return
+  if(!premiosLocales.length){ lista.innerHTML='<div style="font-size:12px;color:#ccc;padding:4px 0">Sin premios configurados</div>'; return }
+  lista.innerHTML = premiosLocales.map(function(p,i){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px;background:#f9f9f9;border-radius:10px;margin-bottom:6px">'
+      +'<div style="flex:1;font-size:13px;font-weight:600">'+p.nombre+'</div>'
+      +'<div style="font-size:12px;color:#FF4D00;font-weight:700">'+p.probabilidad+'%</div>'
+      +'<button onclick="eliminarPremio('+i+')" style="background:#FFF0F0;border:none;border-radius:20px;padding:4px 10px;color:#E24B4A;font-size:11px;font-weight:700;cursor:pointer">✕</button>'
+      +'</div>'
+  }).join('')
+}
+
+function agregarPremio(){
+  var nombre = document.getElementById('premio-nombre-input').value.trim()
+  var prob = parseFloat(document.getElementById('premio-prob-input').value)||0
+  if(!nombre||!prob) return
+  premiosLocales.push({nombre:nombre, probabilidad:prob})
+  document.getElementById('premio-nombre-input').value=''
+  document.getElementById('premio-prob-input').value=''
+  renderPremios()
+}
+
+function eliminarPremio(i){
+  premiosLocales.splice(i,1); renderPremios()
+}
+
+async function guardarRaspadita(){
+  if(!restauranteId) return
+  var data = { restaurante_id:restauranteId, activa:raspaditaActiva, premios:premiosLocales }
+  var r
+  if(raspaditaConfigId){ r = await sb.from('raspaditas_config').update(data).eq('id',raspaditaConfigId) }
+  else { r = await sb.from('raspaditas_config').insert([data]) }
+  await sb.from('restaurantes').update({raspadita_activa:raspaditaActiva}).eq('id',restauranteId)
+  var msg = document.getElementById('rasp-msg')
+  msg.style.display='block'
+  setTimeout(function(){ msg.style.display='none' },2000)
+}
+
+async function generarRaspadita(pedidoId, clienteId){
+  // verificar si el restaurante tiene raspadita activa
+  var config = await sb.from('raspaditas_config').select('*').eq('restaurante_id',restauranteId).single()
+  if(!config.data||!config.data.activa||!config.data.premios||!config.data.premios.length) return
+  // sortear premio
+  var premios = config.data.premios
+  var total = premios.reduce(function(s,p){ return s+p.probabilidad },0)
+  var rand = Math.random()*total
+  var acum = 0; var ganado = null
+  for(var p of premios){
+    acum += p.probabilidad
+    if(rand <= acum){ ganado = p; break }
+  }
+  if(!ganado) return
+  var esGanadora = !ganado.nombre.toLowerCase().includes('sin premio') && !ganado.nombre.toLowerCase().includes('nada')
+  await sb.from('raspaditas').insert([{
+    pedido_id:pedidoId, cliente_id:clienteId,
+    restaurante_id:restauranteId,
+    premio:ganado.nombre, ganada:esGanadora
+  }])
 }
 
 function abrirModal(id){ document.getElementById(id).classList.remove('hidden') }
