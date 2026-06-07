@@ -998,15 +998,16 @@ async function guardarRaspadita(){
   if(!restauranteId) return
   var pct = parseInt(document.getElementById('descuento-porcentaje').value) || 10
   var data = { restaurante_id:restauranteId, activa:raspaditaActiva, descuento_porcentaje:pct }
-  var r
-  if(raspaditaConfigId){ r = await sb.from('raspaditas_config').update(data).eq('id',raspaditaConfigId) }
-  else { r = await sb.from('raspaditas_config').insert([data]) }
+  // usar upsert para crear o actualizar
+  var r = await sb.from('raspaditas_config').upsert(data, {onConflict:'restaurante_id'})
   await sb.from('restaurantes').update({raspadita_activa:raspaditaActiva}).eq('id',restauranteId)
   var msg = document.getElementById('rasp-msg')
-  if(r.error){ msg.style.color='#E24B4A'; msg.textContent='Error: '+r.error.message }
+  if(r.error){ msg.style.color='#E24B4A'; msg.textContent='Error: '+r.error.message; console.error(r.error) }
   else { msg.style.color='#2D6A2D'; msg.textContent='✓ Guardado' }
   msg.style.display='block'
   setTimeout(function(){ msg.style.display='none' },2000)
+  // recargar para confirmar
+  await cargarRaspadita()
 }
 
 async function generarRaspadita(pedidoId, clienteId){
