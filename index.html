@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="ALL Resto"/>
 <meta name="theme-color" content="#FF4D00"/>
 <link rel="manifest" href="manifest.json"/>
-<title>ALL — App Restaurante v1.9</title>
+<title>ALL — App Restaurante v2.0</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -206,7 +206,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
   <div class="restos-body">
     <div class="restos-label">Nuestros restaurantes</div>
     <div id="lista-restos"><div class="loading-text">Cargando restaurantes...</div></div>
-    <div class="version">ALL App Restaurante v1.9</div>
+    <div class="version">ALL App Restaurante v2.0</div>
   </div>
 </div>
 
@@ -237,7 +237,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     <div class="topbar-logo" id="topbar-logo-wrap">🍽</div>
     <div>
       <div class="topbar-name" id="rest-nombre">Restaurante</div>
-      <div class="topbar-sub">Panel del local · v1.9</div>
+      <div class="topbar-sub">Panel del local · v2.0</div>
     </div>
     <div class="estado-badge">
       <div class="dot" id="estado-dot" style="background:#2D6A2D"></div>
@@ -330,7 +330,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     </div>
 
     <button class="btn-main btn-dark" style="margin-top:6px" onclick="cerrarSesion()">Cerrar sesión</button>
-    <div class="version">ALL App Restaurante v1.9</div>
+    <div class="version">ALL App Restaurante v2.0</div>
   </div>
 </div>
 
@@ -934,8 +934,9 @@ async function cargarPedidos(){
 
   lista.innerHTML = pedidos.map(function(p){
     var items = (p.items||[]).map(function(i){ return i.qty+'× '+i.nombre }).join(' · ')
-    var hora = new Date(p.created_at).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})
-    var clienteNombre = (p.perfiles && p.perfiles.nombre) ? p.perfiles.nombre : 'Cliente'
+    var hora = new Date(p.created_at).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit',timeZone:'America/Argentina/Buenos_Aires'})
+    var nroPedido = p.id.substring(0,8).toUpperCase()
+    var clienteNombre = (p.perfiles && p.perfiles.nombre) ? p.perfiles.nombre : 'Sin nombre'
     var clienteTel = (p.perfiles && p.perfiles.telefono) ? p.perfiles.telefono : ''
     var esNuevo = p.estado === 'nuevo'
 
@@ -944,7 +945,10 @@ async function cargarPedidos(){
     // CABECERA — clickeable para ver detalle
     html += '<div class="pedido-head" style="cursor:pointer" onclick="abrirDetallePedido(\''+p.id+'\')">'
     html += '<div>'
+    html += '<div style="display:flex;align-items:center;gap:6px">'
     html += '<span class="tag '+(tagClass[p.estado]||'tag-nuevo')+'">'+(tagLabel[p.estado]||p.estado.toUpperCase())+'</span>'
+    html += '<span style="font-size:11px;font-weight:700;color:#aaa">#'+nroPedido+'</span>'
+    html += '</div>'
     html += '<div class="pedido-cliente" style="margin-top:4px">'+clienteNombre+'</div>'
     if(clienteTel) html += '<div class="pedido-cliente-info">📞 '+clienteTel+'</div>'
     html += '</div>'
@@ -969,7 +973,7 @@ async function cargarPedidos(){
       html += '<button class="btn-accion btn-accion-rojo" onclick="abrirRechazo(\''+p.id+'\')">❌ Rechazar</button>'
     }
     if(p.estado === 'preparando'){
-      html += '<button class="btn-accion btn-accion-naranja" style="background:#1565C0" onclick="cambiarEstadoPedido(\''+p.id+'\',\'camino\')">🏍 Enviar al cliente</button>'
+      html += '<button class="btn-accion btn-accion-naranja" style="background:#1565C0" onclick="cambiarEstadoPedido(\''+p.id+'\',\'en_camino\')">🏍 Enviar al cliente</button>'
     }
     if(p.estado === 'en_camino'){
       html += '<button class="btn-accion btn-accion-verde" onclick="cambiarEstadoPedido(\''+p.id+'\',\'entregado\')">✅ Entregado</button>'
@@ -1019,7 +1023,8 @@ async function abrirDetallePedido(pedidoId){
   var p = r.data
   var clienteNombre = (p.perfiles && p.perfiles.nombre) ? p.perfiles.nombre : 'Cliente'
   var clienteTel = (p.perfiles && p.perfiles.telefono) ? p.perfiles.telefono : '–'
-  var hora = new Date(p.created_at).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})
+  var hora = new Date(p.created_at).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'America/Argentina/Buenos_Aires'})
+  var nroPedido = p.id.substring(0,8).toUpperCase()
   var estadoLabels = {nuevo:'🆕 Nuevo',preparando:'👨‍🍳 Preparando',en_camino:'🏍 En camino',listo:'✅ Listo',entregado:'✅ Entregado',cancelado:'❌ Cancelado'}
 
   var html = ''
@@ -1053,7 +1058,7 @@ async function abrirDetallePedido(pedidoId){
     html += '<div style="margin-top:12px"><img src="'+p.ticket_url+'" style="width:100%;border-radius:10px"/></div>'
   }
 
-  document.getElementById('modal-detalle-titulo').textContent = 'Pedido — '+clienteNombre
+  document.getElementById('modal-detalle-titulo').textContent = '#'+nroPedido+' — '+clienteNombre
   document.getElementById('modal-detalle-body').innerHTML = html
   abrirModal('modal-detalle')
 }
