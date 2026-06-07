@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="ALL Resto"/>
 <meta name="theme-color" content="#FF4D00"/>
 <link rel="manifest" href="manifest.json"/>
-<title>ALL — App Restaurante v2.0</title>
+<title>ALL — App Restaurante v2.1</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -188,6 +188,35 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 /* TOAST */
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:12px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:999;pointer-events:none;opacity:0;transition:.3s}
 .toast.show{opacity:1}
+
+/* NOTIFICACIÓN NUEVO PEDIDO */
+#notif-nuevo-pedido{
+  position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);
+  opacity:0;pointer-events:none;transition:opacity .3s
+}
+#notif-nuevo-pedido.show{opacity:1;pointer-events:all}
+.notif-card{
+  background:#fff;border-radius:28px;padding:32px 28px;text-align:center;
+  transform:scale(0.5);transition:transform .4s cubic-bezier(0.34,1.56,0.64,1);
+  max-width:320px;width:90%;position:relative
+}
+#notif-nuevo-pedido.show .notif-card{transform:scale(1)}
+.notif-emoji{font-size:64px;margin-bottom:8px;animation:ring 1s ease-in-out infinite}
+@keyframes ring{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(10deg)}}
+.notif-titulo{font-size:24px;font-weight:800;color:#FF4D00;margin-bottom:4px}
+.notif-sub{font-size:14px;color:#888;margin-bottom:20px}
+.notif-cliente{font-size:18px;font-weight:700;color:#1A1A1A;margin-bottom:4px}
+.notif-items{font-size:13px;color:#555;margin-bottom:4px;line-height:1.5}
+.notif-total{font-size:22px;font-weight:800;color:#FF4D00;margin-bottom:20px}
+.notif-btn{width:100%;padding:16px;background:#FF4D00;color:#fff;border:none;border-radius:16px;font-size:16px;font-weight:700;cursor:pointer}
+/* partículas */
+.notif-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:28px}
+.particle{position:absolute;width:8px;height:8px;border-radius:50%;animation:particle-fly 1s ease-out forwards}
+@keyframes particle-fly{
+  0%{transform:translate(0,0) scale(1);opacity:1}
+  100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0}
+}
 </style>
 </head>
 <body>
@@ -206,7 +235,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
   <div class="restos-body">
     <div class="restos-label">Nuestros restaurantes</div>
     <div id="lista-restos"><div class="loading-text">Cargando restaurantes...</div></div>
-    <div class="version">ALL App Restaurante v2.0</div>
+    <div class="version">ALL App Restaurante v2.1</div>
   </div>
 </div>
 
@@ -237,7 +266,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     <div class="topbar-logo" id="topbar-logo-wrap">🍽</div>
     <div>
       <div class="topbar-name" id="rest-nombre">Restaurante</div>
-      <div class="topbar-sub">Panel del local · v2.0</div>
+      <div class="topbar-sub">Panel del local · v2.1</div>
     </div>
     <div class="estado-badge">
       <div class="dot" id="estado-dot" style="background:#2D6A2D"></div>
@@ -330,7 +359,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     </div>
 
     <button class="btn-main btn-dark" style="margin-top:6px" onclick="cerrarSesion()">Cerrar sesión</button>
-    <div class="version">ALL App Restaurante v2.0</div>
+    <div class="version">ALL App Restaurante v2.1</div>
   </div>
 </div>
 
@@ -425,6 +454,20 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     <input type="hidden" id="prod-id"/>
     <button class="btn-main" onclick="guardarProducto()">Guardar producto</button>
     <button style="width:100%;padding:14px;background:#f5f5f5;color:#1A1A1A;border:1.5px dashed #ddd;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px" onclick="cerrarModal('modal-producto')">Cancelar</button>
+  </div>
+</div>
+
+<!-- NOTIFICACIÓN NUEVO PEDIDO -->
+<div id="notif-nuevo-pedido" onclick="cerrarNotifPedido()">
+  <div class="notif-card" onclick="event.stopPropagation()">
+    <div class="notif-particles" id="notif-particles"></div>
+    <div class="notif-emoji">🔔</div>
+    <div class="notif-titulo">¡Nuevo pedido!</div>
+    <div class="notif-sub">Ingresó un pedido nuevo</div>
+    <div class="notif-cliente" id="notif-cliente"></div>
+    <div class="notif-items" id="notif-items"></div>
+    <div class="notif-total" id="notif-total"></div>
+    <button class="notif-btn" onclick="cerrarNotifPedido()">Ver pedidos ✓</button>
   </div>
 </div>
 
@@ -903,7 +946,7 @@ async function cargarPedidos(){
     .select('*,perfiles(nombre,telefono)')
     .eq('restaurante_id', restauranteId)
     .in('estado', ['nuevo','preparando','en_camino'])
-    .order('created_at', {ascending: true})
+    .order('created_at', {ascending: false})
 
   var todosHoy = await sb.from('pedidos')
     .select('total,estado')
@@ -921,8 +964,10 @@ async function cargarPedidos(){
 
   // detectar pedidos nuevos para notificación
   var idsActuales = pedidos.filter(function(p){ return p.estado==='nuevo' }).map(function(p){ return p.id })
-  var hayNuevos = idsActuales.some(function(id){ return !ultimosPedidosIds.includes(id) })
-  if(hayNuevos && ultimosPedidosIds.length > 0) mostrarToast('🔔 ¡Nuevo pedido!', 3000)
+  var pedidosNuevosEntrantes = pedidos.filter(function(p){ return p.estado==='nuevo' && !ultimosPedidosIds.includes(p.id) })
+  if(pedidosNuevosEntrantes.length > 0 && ultimosPedidosIds.length > 0){
+    mostrarNotifNuevoPedido(pedidosNuevosEntrantes[0])
+  }
   ultimosPedidosIds = idsActuales
 
   var lista = document.getElementById('lista-pedidos-activos')
@@ -1063,7 +1108,52 @@ async function abrirDetallePedido(pedidoId){
   abrirModal('modal-detalle')
 }
 
-function iniciarPollingPedidos(){
+function mostrarNotifNuevoPedido(pedido){
+  var clienteNombre = (pedido.perfiles && pedido.perfiles.nombre) ? pedido.perfiles.nombre : 'Cliente nuevo'
+  var items = (pedido.items||[]).map(function(i){ return i.qty+'× '+i.nombre }).join(' · ')
+  var total = '$'+Number(pedido.total).toLocaleString('es-AR')
+
+  document.getElementById('notif-cliente').textContent = clienteNombre
+  document.getElementById('notif-items').textContent = items
+  document.getElementById('notif-total').textContent = total
+
+  // partículas
+  var colors = ['#FF4D00','#FFD166','#06D6A0','#118AB2','#EF476F']
+  var container = document.getElementById('notif-particles')
+  container.innerHTML = ''
+  for(var i=0; i<20; i++){
+    var p = document.createElement('div')
+    p.className = 'particle'
+    var tx = (Math.random()-0.5)*400
+    var ty = (Math.random()-0.5)*400
+    p.style.cssText = 'left:50%;top:50%;background:'+colors[i%colors.length]+';'
+      +'--tx:'+tx+'px;--ty:'+ty+'px;animation-delay:'+(Math.random()*0.3)+'s;animation-duration:'+(0.8+Math.random()*0.4)+'s'
+    container.appendChild(p)
+  }
+
+  var notif = document.getElementById('notif-nuevo-pedido')
+  notif.classList.add('show')
+
+  // intentar sonar
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)()
+    var osc = ctx.createOscillator()
+    var gain = ctx.createGain()
+    osc.connect(gain); gain.connect(ctx.destination)
+    osc.frequency.setValueAtTime(880, ctx.currentTime)
+    osc.frequency.setValueAtTime(1100, ctx.currentTime+0.1)
+    osc.frequency.setValueAtTime(880, ctx.currentTime+0.2)
+    gain.gain.setValueAtTime(0.3, ctx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.4)
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.4)
+  } catch(e){}
+}
+
+function cerrarNotifPedido(){
+  document.getElementById('notif-nuevo-pedido').classList.remove('show')
+}
+
+
   cargarPedidos()
   if(pedidosInterval) clearInterval(pedidosInterval)
   pedidosInterval = setInterval(cargarPedidos, 10000)
