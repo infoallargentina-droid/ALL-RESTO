@@ -1153,7 +1153,7 @@ function cerrarNotifPedido(){
   document.getElementById('notif-nuevo-pedido').classList.remove('show')
 }
 
-
+function iniciarPollingPedidos(){
   cargarPedidos()
   if(pedidosInterval) clearInterval(pedidosInterval)
   pedidosInterval = setInterval(cargarPedidos, 10000)
