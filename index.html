@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="ALL Resto"/>
 <meta name="theme-color" content="#FF4D00"/>
 <link rel="manifest" href="manifest.json"/>
-<title>ALL — App Restaurante v2.2</title>
+<title>ALL — App Restaurante v2.3</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -185,7 +185,16 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 .cat-sel-chip{padding:7px 14px;border-radius:20px;border:1.5px solid #eee;background:#fafafa;font-size:13px;font-weight:600;color:#555;cursor:pointer}
 .cat-sel-chip.selected{background:#FF4D00;color:#fff;border-color:#FF4D00}
 
-/* TOAST */
+/* HORARIOS */
+.horario-dia-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f5f5f5}
+.horario-dia-nombre{font-size:13px;font-weight:600;color:#1A1A1A;width:80px;flex-shrink:0}
+.horario-toggle{width:40px;height:24px;border-radius:20px;position:relative;cursor:pointer;transition:.2s;flex-shrink:0}
+.horario-toggle-thumb{width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.horario-time-wrap{display:flex;align-items:center;gap:6px;flex:1}
+.horario-time-input{padding:6px 10px;font-size:13px;border-radius:8px;border:1.5px solid #eee;background:#fafafa;color:#1A1A1A;outline:none;width:80px}
+.horario-time-input:focus{border-color:#FF4D00}
+.horario-cerrado-label{font-size:12px;color:#aaa;font-weight:600}
+.override-badge{display:inline-flex;align-items:center;gap:6px;background:#FFF0F0;border:1px solid #FFD0D0;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:#E24B4A;margin-top:8px}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:12px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:999;pointer-events:none;opacity:0;transition:.3s}
 .toast.show{opacity:1}
 
@@ -238,7 +247,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
   <div class="restos-body">
     <div class="restos-label">Nuestros restaurantes</div>
     <div id="lista-restos"><div class="loading-text">Cargando restaurantes...</div></div>
-    <div class="version">ALL App Restaurante v2.2</div>
+    <div class="version">ALL App Restaurante v2.3</div>
   </div>
 </div>
 
@@ -269,7 +278,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     <div class="topbar-logo" id="topbar-logo-wrap">🍽</div>
     <div>
       <div class="topbar-name" id="rest-nombre">Restaurante</div>
-      <div class="topbar-sub">Panel del local · v2.2</div>
+      <div class="topbar-sub">Panel del local · v2.3</div>
     </div>
     <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px">
       <div class="estado-badge">
@@ -364,8 +373,19 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
       <div id="rasp-msg" style="font-size:11px;color:#2D6A2D;margin-top:8px;text-align:center;display:none">✓ Guardado</div>
     </div>
 
+    <!-- HORARIOS DE ATENCIÓN -->
+    <div class="cats-section">
+      <div class="cats-title">
+        <span>🕐 Horarios de atención</span>
+      </div>
+      <div style="font-size:12px;color:#888;margin-bottom:12px">El local se abre y cierra automáticamente según estos horarios. Podés cerrar manualmente en cualquier momento.</div>
+      <div id="horarios-lista"></div>
+      <button class="btn-main" style="margin-top:14px" onclick="guardarHorarios()">Guardar horarios</button>
+      <div id="horarios-msg" style="font-size:11px;color:#2D6A2D;margin-top:8px;text-align:center;display:none">✓ Horarios guardados</div>
+    </div>
+
     <button class="btn-main btn-dark" style="margin-top:6px" onclick="cerrarSesion()">Cerrar sesión</button>
-    <div class="version">ALL App Restaurante v2.2</div>
+    <div class="version">ALL App Restaurante v2.3</div>
   </div>
 </div>
 
@@ -585,6 +605,7 @@ async function mostrarPanel(nombre,emoji,cat,logoUrl){
   }
   cargarLogoLocal(logoUrl)
   cargarCategorias()
+  cargarHorarios()
   iniciarPollingPedidos()
 }
 
@@ -604,7 +625,7 @@ function switchTab(tab,el){
     document.getElementById('tab-'+t).classList[t===tab?'remove':'add']('hidden')
   })
   if(tab==='menu') cargarMenu()
-  if(tab==='local'){ cargarLogoLocal(); cargarCategorias(); cargarRaspadita() }
+  if(tab==='local'){ cargarLogoLocal(); cargarCategorias(); cargarRaspadita(); cargarHorarios() }
   if(tab==='pedidos') iniciarPollingPedidos()
 }
 
@@ -927,12 +948,144 @@ function togglePromo(){
   else { track.style.background='#ddd'; thumb.style.left='3px'; fields.style.display='none' }
 }
 
+// override manual: null = sigue el horario, true = forzado abierto, false = forzado cerrado
+var overrideManual = null
+
 function toggleAbierto(){
-  abierto=!abierto
+  // Si está en horario activo y el usuario cierra → override cerrado
+  // Si está fuera de horario y el usuario abre → override abierto
+  // Si hay override y el usuario vuelve a tocar → quita el override
+  var estadoAutoActual = calcularEstadoAutomatico()
+  if(overrideManual === null){
+    // sin override — aplicar override contrario al automático
+    overrideManual = !estadoAutoActual
+  } else {
+    // ya hay override — quitar override, volver al automático
+    overrideManual = null
+  }
+  aplicarEstadoLocal()
+  // guardar override en Supabase
+  if(restauranteId){
+    sb.from('restaurantes').update({
+      abierto: overrideManual !== null ? overrideManual : estadoAutoActual,
+      override_manual: overrideManual
+    }).eq('id', restauranteId)
+  }
+}
+
+function calcularEstadoAutomatico(){
+  if(!horariosActuales) return true // sin horarios configurados → siempre abierto
+  var ahora = new Date()
+  var diasSemana = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado']
+  var diaActual = diasSemana[ahora.getDay()]
+  var horarioDia = horariosActuales[diaActual]
+  if(!horarioDia || !horarioDia.activo) return false // día no configurado → cerrado
+  var horaActual = ahora.getHours()*60 + ahora.getMinutes()
+  var partes1 = horarioDia.apertura.split(':')
+  var partes2 = horarioDia.cierre.split(':')
+  var apertura = parseInt(partes1[0])*60 + parseInt(partes1[1])
+  var cierre = parseInt(partes2[0])*60 + parseInt(partes2[1])
+  return horaActual >= apertura && horaActual < cierre
+}
+
+function aplicarEstadoLocal(){
+  var estadoAuto = calcularEstadoAutomatico()
+  var estadoFinal = overrideManual !== null ? overrideManual : estadoAuto
+  abierto = estadoFinal
   var track=document.getElementById('toggle-track'), thumb=document.getElementById('toggle-thumb')
   var dot=document.getElementById('estado-dot'), texto=document.getElementById('estado-texto'), sub=document.getElementById('toggle-sub-text')
-  if(abierto){ track.style.background='#2D6A2D'; thumb.style.left='23px'; dot.style.background='#2D6A2D'; texto.style.color='#2D6A2D'; texto.textContent='Abierto'; sub.textContent='Recibiendo pedidos' }
-  else { track.style.background='#ddd'; thumb.style.left='3px'; dot.style.background='#ccc'; texto.style.color='#ccc'; texto.textContent='Cerrado'; sub.textContent='Local pausado' }
+  if(estadoFinal){
+    track.style.background='#2D6A2D'; thumb.style.left='23px'
+    dot.style.background='#2D6A2D'; texto.style.color='#2D6A2D'; texto.textContent='Abierto'
+    sub.textContent = overrideManual===true ? '🟡 Abierto manualmente' : 'Recibiendo pedidos'
+  } else {
+    track.style.background='#ddd'; thumb.style.left='3px'
+    dot.style.background='#ccc'; texto.style.color='#ccc'; texto.textContent='Cerrado'
+    sub.textContent = overrideManual===false ? '🔴 Cerrado manualmente' : 'Fuera de horario'
+  }
+}
+
+// ─── HORARIOS ─────────────────────────────────────────────────────────────────
+var horariosActuales = null
+var horariosInterval = null
+const DIAS = [
+  {id:'lunes',    label:'Lunes'},
+  {id:'martes',   label:'Martes'},
+  {id:'miercoles',label:'Miércoles'},
+  {id:'jueves',   label:'Jueves'},
+  {id:'viernes',  label:'Viernes'},
+  {id:'sabado',   label:'Sábado'},
+  {id:'domingo',  label:'Domingo'}
+]
+
+async function cargarHorarios(){
+  if(!restauranteId) return
+  var r = await sb.from('restaurantes').select('horarios,override_manual').eq('id',restauranteId).single()
+  if(r.data){
+    horariosActuales = r.data.horarios || null
+    overrideManual = r.data.override_manual !== undefined ? r.data.override_manual : null
+  }
+  renderHorarios()
+  aplicarEstadoLocal()
+  // polling cada minuto para actualizar estado automático
+  if(horariosInterval) clearInterval(horariosInterval)
+  horariosInterval = setInterval(function(){
+    if(overrideManual === null) aplicarEstadoLocal()
+  }, 60000)
+}
+
+function renderHorarios(){
+  var lista = document.getElementById('horarios-lista')
+  if(!lista) return
+  var horarios = horariosActuales || {}
+  lista.innerHTML = DIAS.map(function(dia){
+    var h = horarios[dia.id] || {activo:false, apertura:'09:00', cierre:'22:00'}
+    return '<div class="horario-dia-row">'
+      +'<div class="horario-dia-nombre">'+dia.label+'</div>'
+      +'<div class="horario-toggle" id="htoggle-'+dia.id+'" style="background:'+(h.activo?'#FF4D00':'#ddd')+'" onclick="toggleDia(\''+dia.id+'\')">'
+      +'<div class="horario-toggle-thumb" id="hthumb-'+dia.id+'" style="left:'+(h.activo?'19px':'3px')+'"></div>'
+      +'</div>'
+      +'<div class="horario-time-wrap" id="htime-'+dia.id+'" style="opacity:'+(h.activo?1:0.3)+';pointer-events:'+(h.activo?'all':'none')+'">'
+      +'<input type="time" class="horario-time-input" id="hapert-'+dia.id+'" value="'+h.apertura+'"/>'
+      +'<span style="font-size:12px;color:#888">a</span>'
+      +'<input type="time" class="horario-time-input" id="hcierre-'+dia.id+'" value="'+h.cierre+'"/>'
+      +'</div>'
+      +(h.activo?'':'<span class="horario-cerrado-label">Cerrado</span>')
+      +'</div>'
+  }).join('')
+}
+
+function toggleDia(diaId){
+  var horarios = horariosActuales || {}
+  var h = horarios[diaId] || {activo:false, apertura:'09:00', cierre:'22:00'}
+  h.activo = !h.activo
+  horarios[diaId] = h
+  horariosActuales = horarios
+  renderHorarios()
+}
+
+async function guardarHorarios(){
+  if(!restauranteId) return
+  var horarios = {}
+  DIAS.forEach(function(dia){
+    var toggleEl = document.getElementById('htoggle-'+dia.id)
+    var activo = toggleEl && toggleEl.style.background !== 'rgb(221, 221, 221)'
+    var apertura = document.getElementById('hapert-'+dia.id)
+    var cierre = document.getElementById('hcierre-'+dia.id)
+    horarios[dia.id] = {
+      activo: activo,
+      apertura: apertura ? apertura.value : '09:00',
+      cierre: cierre ? cierre.value : '22:00'
+    }
+  })
+  horariosActuales = horarios
+  var r = await sb.from('restaurantes').update({horarios: horarios}).eq('id',restauranteId)
+  var msg = document.getElementById('horarios-msg')
+  if(r.error){ msg.style.color='#E24B4A'; msg.textContent='Error guardando' }
+  else { msg.style.color='#2D6A2D'; msg.textContent='✓ Horarios guardados' }
+  msg.style.display='block'
+  setTimeout(function(){ msg.style.display='none' },2000)
+  aplicarEstadoLocal()
 }
 
 function togglePass(inputId,ojoId){
