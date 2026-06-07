@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="ALL Resto"/>
 <meta name="theme-color" content="#FF4D00"/>
 <link rel="manifest" href="manifest.json"/>
-<title>ALL — App Restaurante v1.6</title>
+<title>ALL — App Restaurante v1.7</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -75,7 +75,10 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 .stat-label{font-size:10px;color:#888;margin-top:3px}
 .section-title{font-size:11px;font-weight:600;color:#888;letter-spacing:1px;margin-bottom:10px;text-transform:uppercase}
 
-.pedido-card{background:#fff;border-radius:16px;border:1px solid #FFE8DC;margin-bottom:12px;overflow:hidden}
+.pedido-card{background:#fff;border-radius:16px;border:1px solid #FFE8DC;margin-bottom:12px;overflow:hidden;cursor:pointer;transition:.15s}
+.pedido-card:active{border-color:#FF4D00}
+.pedido-card.nuevo-destello{animation:destello 1s ease-in-out infinite}
+@keyframes destello{0%,100%{border-color:#FFE8DC}50%{border-color:#FF4D00;box-shadow:0 0 0 3px rgba(255,77,0,0.15)}}
 .pedido-head{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #FFE8DC}
 .pedido-num{font-size:12px;font-weight:700;color:#FF4D00}
 .pedido-cliente{font-size:14px;font-weight:600;color:#1A1A1A;margin-top:2px}
@@ -83,13 +86,20 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 .tag{font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px}
 .tag-nuevo{background:#FFF0E5;color:#FF4D00;border:1px solid #FFE8DC}
 .tag-prep{background:#FFF9E5;color:#B8860B;border:1px solid #FFE8A0}
+.tag-camino{background:#E3F2FD;color:#1565C0;border:1px solid #BBDEFB}
 .tag-ok{background:#E8F5E9;color:#2D6A2D;border:1px solid #C8E6C9}
 .pedido-items{padding:10px 14px;border-bottom:1px solid #FFE8DC;font-size:13px;color:#555;line-height:2}
 .pedido-footer{padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
 .pedido-total{font-size:14px;font-weight:700;color:#1A1A1A}
 .pedido-dir{font-size:11px;color:#888;margin-top:2px}
-.btn-confirmar{padding:10px 18px;border-radius:20px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:#FF4D00;color:#fff}
-.btn-listo{padding:10px 18px;border-radius:20px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:#2D6A2D;color:#fff}
+
+/* BOTONES DE ACCIÓN */
+.pedido-acciones{display:flex;gap:8px;padding:12px 14px;border-top:1px solid #FFE8DC;flex-wrap:wrap}
+.btn-accion{flex:1;padding:12px 10px;border-radius:12px;border:none;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;min-width:100px}
+.btn-accion-verde{background:#E8F5E9;color:#2D6A2D}
+.btn-accion-rojo{background:#FFF0F0;color:#E24B4A}
+.btn-accion-azul{background:#E3F2FD;color:#1565C0}
+.btn-accion-naranja{background:#FF4D00;color:#fff}
 
 /* MENU */
 .menu-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
@@ -158,20 +168,26 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 .promo-fields{margin-top:14px;display:none}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .hidden{display:none !important}
-.pedido-estado-btns{display:flex;gap:6px;flex-wrap:wrap;padding:10px 14px;border-top:1px solid #FFE8DC}
-.btn-estado{padding:7px 14px;border-radius:20px;border:none;font-size:11px;font-weight:700;cursor:pointer}
-.btn-preparar{background:#FFF9E5;color:#B8860B}
-.btn-enviar{background:#E3F2FD;color:#1565C0}
-.btn-entregar{background:#E8F5E9;color:#2D6A2D}
-.btn-cancelar{background:#FFF0F0;color:#E24B4A}
 .pedido-cliente-info{font-size:11px;color:#888;margin-top:2px}
 .loading-text{text-align:center;padding:20px;color:#888;font-size:13px}
+
+/* MODAL DETALLE PEDIDO */
+.detalle-item-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:13px}
+.detalle-item-nombre{color:#1A1A1A;font-weight:500}
+.detalle-item-precio{color:#FF4D00;font-weight:700}
+.detalle-info-row{display:flex;justify-content:space-between;padding:6px 0;font-size:12px}
+.detalle-info-label{color:#888}
+.detalle-info-val{color:#1A1A1A;font-weight:600;text-align:right;max-width:60%}
 
 /* selector categoría en modal */
 .cat-selector-wrap{margin-bottom:16px}
 .cat-selector-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
 .cat-sel-chip{padding:7px 14px;border-radius:20px;border:1.5px solid #eee;background:#fafafa;font-size:13px;font-weight:600;color:#555;cursor:pointer}
 .cat-sel-chip.selected{background:#FF4D00;color:#fff;border-color:#FF4D00}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:12px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:999;pointer-events:none;opacity:0;transition:.3s}
+.toast.show{opacity:1}
 </style>
 </head>
 <body>
@@ -190,7 +206,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
   <div class="restos-body">
     <div class="restos-label">Nuestros restaurantes</div>
     <div id="lista-restos"><div class="loading-text">Cargando restaurantes...</div></div>
-    <div class="version">ALL App Restaurante v1.6</div>
+    <div class="version">ALL App Restaurante v1.7</div>
   </div>
 </div>
 
@@ -221,7 +237,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     <div class="topbar-logo" id="topbar-logo-wrap">🍽</div>
     <div>
       <div class="topbar-name" id="rest-nombre">Restaurante</div>
-      <div class="topbar-sub">Panel del local · v1.6</div>
+      <div class="topbar-sub">Panel del local · v1.7</div>
     </div>
     <div class="estado-badge">
       <div class="dot" id="estado-dot" style="background:#2D6A2D"></div>
@@ -314,7 +330,40 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     </div>
 
     <button class="btn-main btn-dark" style="margin-top:6px" onclick="cerrarSesion()">Cerrar sesión</button>
-    <div class="version">ALL App Restaurante v1.6</div>
+    <div class="version">ALL App Restaurante v1.7</div>
+  </div>
+</div>
+
+<!-- MODAL RECHAZO -->
+<div id="modal-rechazo" class="modal-bg hidden" onclick="cerrarModalBg(event,'modal-rechazo')">
+  <div class="modal">
+    <div class="modal-title">
+      <span>❌ Rechazar pedido</span>
+      <span class="modal-close" onclick="cerrarModal('modal-rechazo')">✕</span>
+    </div>
+    <input type="hidden" id="rechazo-pedido-id"/>
+    <div class="field-label">Motivo del rechazo</div>
+    <input type="text" id="rechazo-motivo" class="input" placeholder="Ej: No hay stock de empanadas de carne"/>
+    <div style="font-size:12px;color:#888;margin-bottom:16px">El cliente verá este mensaje en su app.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <button style="padding:10px;background:#f5f5f5;border:none;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;color:#555" onclick="document.getElementById('rechazo-motivo').value='Sin stock del producto'">Sin stock</button>
+      <button style="padding:10px;background:#f5f5f5;border:none;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;color:#555" onclick="document.getElementById('rechazo-motivo').value='Local cerrado por el momento'">Local cerrado</button>
+      <button style="padding:10px;background:#f5f5f5;border:none;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;color:#555" onclick="document.getElementById('rechazo-motivo').value='Fuera de zona de entrega'">Fuera de zona</button>
+      <button style="padding:10px;background:#f5f5f5;border:none;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;color:#555" onclick="document.getElementById('rechazo-motivo').value='Demasiados pedidos en este momento'">Mucha demanda</button>
+    </div>
+    <button class="btn-main" style="background:#E24B4A;margin-top:8px" onclick="confirmarRechazo()">Confirmar rechazo</button>
+    <button style="width:100%;padding:14px;background:#f5f5f5;color:#1A1A1A;border:none;border-radius:14px;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px" onclick="cerrarModal('modal-rechazo')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL DETALLE PEDIDO -->
+<div id="modal-detalle" class="modal-bg hidden" onclick="cerrarModalBg(event,'modal-detalle')">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modal-detalle-titulo">Detalle del pedido</span>
+      <span class="modal-close" onclick="cerrarModal('modal-detalle')">✕</span>
+    </div>
+    <div id="modal-detalle-body"></div>
   </div>
 </div>
 
@@ -379,6 +428,9 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
   </div>
 </div>
 
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
 <script>
 const SUPABASE_URL = 'https://rkinieckmmlvldnccbzm.supabase.co'
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJraW5pZWNrbW1sdmxkbmNjYnptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM1NTQsImV4cCI6MjA5NTgxOTU1NH0.Mb82xSMu5KSwgju-rUEh-BBWNVLmJ3Fso5EZy4QeOvs'
@@ -393,6 +445,12 @@ var categoriasLocales = []
 const CATS_SUGERIDAS = ['Pizzas','Empanadas','Bebidas','Postres','Entradas','Carnes','Pastas','Sushi','Hamburguesas','Sandwiches','Ensaladas','Combos','Para compartir','Sin TACC']
 
 function escQ(s){ return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'") }
+
+function mostrarToast(msg, dur){
+  var t = document.getElementById('toast')
+  t.textContent = msg; t.classList.add('show')
+  setTimeout(function(){ t.classList.remove('show') }, dur||2500)
+}
 
 // ─── RESTAURANTES ────────────────────────────────────────────────────────────
 async function cargarListaRestos(){
@@ -628,15 +686,12 @@ async function cargarMenu(){
     lista.innerHTML='<div class="loading-text">Sin productos todavía.</div><button class="btn-add-prod" onclick="abrirNuevoProducto()">+ Agregar primer producto</button>'
     return
   }
-
-  // agrupar
   var cats={}, catKeys=[]
   productos.forEach(function(p){
     var cat=p.categoria||'Sin categoría'
     if(!cats[cat]){ cats[cat]=[]; catKeys.push(cat) }
     cats[cat].push(p)
   })
-  // respetar orden de categoriasLocales
   var ordered=[]
   categoriasLocales.forEach(function(c){ if(cats[c]) ordered.push(c) })
   catKeys.forEach(function(c){ if(!ordered.includes(c)) ordered.push(c) })
@@ -651,11 +706,9 @@ async function cargarMenu(){
       var horaOk=(!p.promo_hora_inicio&&!p.promo_hora_fin)||(p.promo_hora_inicio&&p.promo_hora_fin&&ahoraStr>=p.promo_hora_inicio&&ahoraStr<=p.promo_hora_fin)
       var tienePromo=p.promocion_activa&&p.precio_promocion&&p.promocion_inicio<=hoy&&p.promocion_fin>=hoy&&horaOk
       var desc=tienePromo?Math.round((1-p.precio_promocion/p.precio)*100):0
-      var pJson=JSON.stringify(p).replace(/\\/g,'\\\\').replace(/'/g,"\\'")
       html+='<div class="prod-card">'
       html+='<div class="prod-img-wrap">'
-      html+=p.imagen_url?'<img class="prod-img" src="'+p.imagen_url+'" alt="'+p.nombre+'"/>'
-        :'<div class="prod-img-placeholder">🍽</div>'
+      html+=p.imagen_url?'<img class="prod-img" src="'+p.imagen_url+'" alt="'+p.nombre+'"/>':'<div class="prod-img-placeholder">🍽</div>'
       if(tienePromo) html+='<div class="prod-badge-promo">🔥 '+desc+'% OFF</div>'
       if(!p.disponible) html+='<div class="prod-badge-nodisponible">NO DISPONIBLE</div>'
       html+='</div>'
@@ -679,10 +732,9 @@ async function cargarMenu(){
         ?'<button class="btn-sm btn-sm-gris" onclick="toggleDisponible(\''+p.id+'\',false)">⏸ Pausar</button>'
         :'<button class="btn-sm btn-sm-verde" onclick="toggleDisponible(\''+p.id+'\',true)">▶️ Activar</button>'
       html+='<button class="btn-sm btn-sm-rojo" onclick="eliminarProducto(\''+p.id+'\')">🗑</button>'
-      // flechas orden
       html+='<div class="prod-orden">'
-      if(idx>0) html+='<button class="btn-sm btn-sm-orden" onclick="moverProducto(this,\''+p.id+'\',\''+cat+'\','+(idx-1)+','+idx+')">&#8593;</button>'
-      if(idx<prods.length-1){var ni=idx+1; html+='<button class="btn-sm btn-sm-orden" onclick="moverProducto(this,\''+p.id+'\',\''+cat+'\','+ni+','+idx+')">&#8595;</button>'}
+      if(idx>0) html+='<button class="btn-sm btn-sm-orden" onclick="moverProducto(\''+p.id+'\',\''+cat+'\','+(idx-1)+','+idx+')">&#8593;</button>'
+      if(idx<prods.length-1){ var ni=idx+1; html+='<button class="btn-sm btn-sm-orden" onclick="moverProducto(\''+p.id+'\',\''+cat+'\','+ni+','+idx+')">&#8595;</button>' }
       html+='</div>'
       html+='</div></div>'
     })
@@ -692,25 +744,19 @@ async function cargarMenu(){
   lista.innerHTML=html
 }
 
-// ─── ORDEN PRODUCTOS ──────────────────────────────────────────────────────────
 async function moverProducto(id, cat, newIdx, oldIdx){
-  // buscar todos los productos de esa categoría ordenados
   var result=await sb.from('productos').select('id,orden').eq('restaurante_id',restauranteId).eq('categoria',cat).order('orden',{ascending:true,nullsFirst:false})
   if(result.error||!result.data) return
   var prods=result.data
-  // reasignar índices
   var moved=prods.splice(oldIdx,1)[0]
   prods.splice(newIdx,0,moved)
-  // guardar nuevos órdenes
   var updates=prods.map(function(p,i){ return sb.from('productos').update({orden:i}).eq('id',p.id) })
   await Promise.all(updates)
   cargarMenu()
 }
 
 // ─── PRODUCTO MODAL ───────────────────────────────────────────────────────────
-function abrirNuevoProducto(){
-  limpiarModalProducto(); renderCatSelectorModal(); abrirModal('modal-producto')
-}
+function abrirNuevoProducto(){ limpiarModalProducto(); renderCatSelectorModal(); abrirModal('modal-producto') }
 
 function previewFoto(input){
   var file=input.files[0]; if(!file) return
@@ -741,7 +787,6 @@ async function guardarProducto(){
     imagenUrl=sb.storage.from('productos').getPublicUrl(fileName).data.publicUrl
   }
 
-  // calcular orden al final de su categoría
   var ordenMax=0
   var prodId=document.getElementById('prod-id').value
   if(!prodId){
@@ -846,12 +891,14 @@ function togglePass(inputId,ojoId){
   if(input.type==='password'){ input.type='text'; ojo.textContent='🙈' } else { input.type='password'; ojo.textContent='👁' }
 }
 
-// ─── PEDIDOS EN TIEMPO REAL ──────────────────────────────────────────────────
+// ─── PEDIDOS ─────────────────────────────────────────────────────────────────
 var pedidosInterval = null
+var ultimosPedidosIds = []
 
 async function cargarPedidos(){
   if(!restauranteId) return
   var hoy = new Date().toISOString().split('T')[0]
+
   var result = await sb.from('pedidos')
     .select('*,perfiles(nombre,telefono)')
     .eq('restaurante_id', restauranteId)
@@ -863,70 +910,151 @@ async function cargarPedidos(){
     .eq('restaurante_id', restauranteId)
     .gte('created_at', hoy+'T00:00:00')
 
-  // stats
   var pedidosHoy = todosHoy.data || []
-  var nuevos = (result.data||[]).filter(function(p){ return p.estado==='nuevo' }).length
+  var pedidos = result.data || []
+  var nuevos = pedidos.filter(function(p){ return p.estado==='nuevo' }).length
   var ingresos = pedidosHoy.filter(function(p){ return p.estado==='entregado' }).reduce(function(s,p){ return s+p.total },0)
+
   document.getElementById('stat-nuevos').textContent = nuevos
   document.getElementById('stat-hoy').textContent = pedidosHoy.length
   document.getElementById('stat-ingresos').textContent = '$'+Math.round(ingresos/1000)+'k'
 
+  // detectar pedidos nuevos para notificación
+  var idsActuales = pedidos.filter(function(p){ return p.estado==='nuevo' }).map(function(p){ return p.id })
+  var hayNuevos = idsActuales.some(function(id){ return !ultimosPedidosIds.includes(id) })
+  if(hayNuevos && ultimosPedidosIds.length > 0) mostrarToast('🔔 ¡Nuevo pedido!', 3000)
+  ultimosPedidosIds = idsActuales
+
   var lista = document.getElementById('lista-pedidos-activos')
   if(result.error){ lista.innerHTML='<div class="loading-text">Error cargando pedidos</div>'; return }
-  var pedidos = result.data || []
   if(!pedidos.length){ lista.innerHTML='<div class="loading-text">Sin pedidos activos 🎉</div>'; return }
 
-  var tagClass = {nuevo:'tag-nuevo', preparando:'tag-prep', camino:'tag-prep', entregado:'tag-ok'}
+  var tagClass = {nuevo:'tag-nuevo', preparando:'tag-prep', camino:'tag-camino', entregado:'tag-ok'}
   var tagLabel = {nuevo:'NUEVO', preparando:'PREPARANDO', camino:'EN CAMINO', entregado:'LISTO'}
 
   lista.innerHTML = pedidos.map(function(p){
-    var items = (p.items||[]).map(function(i){ return i.qty+'× '+i.nombre }).join('<br>')
+    var items = (p.items||[]).map(function(i){ return i.qty+'× '+i.nombre }).join(' · ')
     var hora = new Date(p.created_at).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})
-    var clienteNombre = p.perfiles ? p.perfiles.nombre : 'Cliente'
-    var clienteTel = p.perfiles && p.perfiles.telefono ? ' · '+p.perfiles.telefono : ''
-    var html = '<div class="pedido-card">'
+    var clienteNombre = (p.perfiles && p.perfiles.nombre) ? p.perfiles.nombre : 'Cliente'
+    var clienteTel = (p.perfiles && p.perfiles.telefono) ? p.perfiles.telefono : ''
+    var esNuevo = p.estado === 'nuevo'
+
+    var html = '<div class="pedido-card'+(esNuevo?' nuevo-destello':'')+'" onclick="abrirDetallePedido(\''+p.id+'\')">'
+
+    // CABECERA
     html += '<div class="pedido-head">'
-    html += '<div><div style="display:flex;align-items:center;gap:6px">'
+    html += '<div>'
     html += '<span class="tag '+(tagClass[p.estado]||'tag-nuevo')+'">'+(tagLabel[p.estado]||p.estado.toUpperCase())+'</span>'
+    html += '<div class="pedido-cliente" style="margin-top:4px">'+clienteNombre+'</div>'
+    if(clienteTel) html += '<div class="pedido-cliente-info">📞 '+clienteTel+'</div>'
     html += '</div>'
-    html += '<div class="pedido-cliente">'+clienteNombre+'</div>'
-    html += '<div class="pedido-cliente-info">'+clienteTel+'</div>'
-    html += '</div><div class="pedido-hora">'+hora+'</div></div>'
+    html += '<div style="text-align:right"><div class="pedido-hora">'+hora+'</div>'
+    html += '<div style="font-size:13px;font-weight:700;color:#FF4D00;margin-top:4px">$'+Number(p.total).toLocaleString('es-AR')+'</div>'
+    html += '</div></div>'
+
+    // ITEMS
     html += '<div class="pedido-items">'+items+'</div>'
-    // desglose
-    html += '<div style="padding:8px 14px;font-size:12px;color:#888;border-bottom:1px solid #FFE8DC">'
-    html += '📍 '+p.direccion_entrega
-    html += ' &nbsp;·&nbsp; 💳 '+p.metodo_pago
+
+    // DIRECCIÓN
+    html += '<div style="padding:8px 14px;font-size:11px;color:#888;border-bottom:1px solid #FFE8DC">'
+    html += '📍 '+p.direccion_entrega+' &nbsp;·&nbsp; 💳 '+p.metodo_pago
     if(p.notas) html += '<br>📝 '+p.notas
     html += '</div>'
-    html += '<div class="pedido-footer">'
-    html += '<div><div class="pedido-total">$'+Number(p.total).toLocaleString('es-AR')+'</div>'
-    if(p.costo_envio>0) html += '<div style="font-size:11px;color:#888">Envío: $'+Number(p.costo_envio).toLocaleString('es-AR')+'</div>'
-    if(p.propina>0) html += '<div style="font-size:11px;color:#2D6A2D">Propina: $'+Number(p.propina).toLocaleString('es-AR')+'</div>'
-    html += '</div>'
-    // botones según estado
-    html += '<div style="display:flex;gap:6px;flex-wrap:wrap">'
-    if(p.estado==='nuevo'){
-      html += '<button class="btn-estado btn-preparar" data-id="'+p.id+'" data-est="preparando" onclick="cambiarEstadoPedido(this.dataset.id,this.dataset.est)">👨‍🍳 Preparar</button>'
-      html += '<button class="btn-estado btn-cancelar" data-id="'+p.id+'" data-est="cancelado" onclick="cambiarEstadoPedido(this.dataset.id,this.dataset.est)">✕ Cancelar</button>'
+
+    // BOTONES DE ACCIÓN según estado
+    html += '<div class="pedido-acciones" onclick="event.stopPropagation()">'
+    if(p.estado === 'nuevo'){
+      html += '<button class="btn-accion btn-accion-verde" onclick="aceptarPedido(\''+p.id+'\')">✅ Aceptar</button>'
+      html += '<button class="btn-accion btn-accion-rojo" onclick="abrirRechazo(\''+p.id+'\')">❌ Rechazar</button>'
     }
-    if(p.estado==='preparando'){
-      html += '<button class="btn-estado btn-enviar" data-id="'+p.id+'" data-est="camino" onclick="cambiarEstadoPedido(this.dataset.id,this.dataset.est)">🏍 Enviar</button>'
+    if(p.estado === 'preparando'){
+      html += '<button class="btn-accion btn-accion-naranja" style="background:#1565C0" onclick="cambiarEstadoPedido(\''+p.id+'\',\'camino\')">🏍 Enviar al cliente</button>'
     }
-    if(p.estado==='camino'){
-      html += '<button class="btn-estado btn-entregar" data-id="'+p.id+'" data-est="entregado" onclick="cambiarEstadoPedido(this.dataset.id,this.dataset.est)">✅ Entregado</button>'
+    if(p.estado === 'camino'){
+      html += '<button class="btn-accion btn-accion-verde" onclick="cambiarEstadoPedido(\''+p.id+'\',\'entregado\')">✅ Entregado</button>'
     }
     if(p.ticket_url){
-      html += '<button class="btn-estado" style="background:#E3F2FD;color:#1565C0" data-url="'+p.ticket_url+'" onclick="window.open(this.dataset.url)">&#128206; Comprobante</button>'
+      html += '<button class="btn-accion btn-accion-azul" onclick="window.open(\''+p.ticket_url+'\')">📄 Comprobante</button>'
     }
-    html += '</div></div></div>'
+    html += '</div></div>'
     return html
   }).join('')
 }
 
+async function aceptarPedido(pedidoId){
+  var r = await sb.from('pedidos').update({estado:'preparando'}).eq('id',pedidoId)
+  if(!r.error) mostrarToast('✅ Pedido aceptado — en preparación')
+  cargarPedidos()
+}
+
+function abrirRechazo(pedidoId){
+  document.getElementById('rechazo-pedido-id').value = pedidoId
+  document.getElementById('rechazo-motivo').value = ''
+  abrirModal('modal-rechazo')
+}
+
+async function confirmarRechazo(){
+  var pedidoId = document.getElementById('rechazo-pedido-id').value
+  var motivo = document.getElementById('rechazo-motivo').value.trim() || 'No disponible en este momento'
+  var r = await sb.from('pedidos').update({
+    estado: 'cancelado',
+    motivo_cancelacion: motivo
+  }).eq('id', pedidoId)
+  cerrarModal('modal-rechazo')
+  if(!r.error) mostrarToast('❌ Pedido rechazado')
+  cargarPedidos()
+}
+
 async function cambiarEstadoPedido(pedidoId, nuevoEstado){
   await sb.from('pedidos').update({estado:nuevoEstado}).eq('id',pedidoId)
+  var labels = {camino:'🏍 Pedido en camino', entregado:'✅ Pedido entregado'}
+  if(labels[nuevoEstado]) mostrarToast(labels[nuevoEstado])
   cargarPedidos()
+}
+
+async function abrirDetallePedido(pedidoId){
+  var r = await sb.from('pedidos').select('*,perfiles(nombre,telefono)').eq('id',pedidoId).single()
+  if(r.error || !r.data) return
+  var p = r.data
+  var clienteNombre = (p.perfiles && p.perfiles.nombre) ? p.perfiles.nombre : 'Cliente'
+  var clienteTel = (p.perfiles && p.perfiles.telefono) ? p.perfiles.telefono : '–'
+  var hora = new Date(p.created_at).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})
+  var estadoLabels = {nuevo:'🆕 Nuevo',preparando:'👨‍🍳 Preparando',camino:'🏍 En camino',entregado:'✅ Entregado',cancelado:'❌ Cancelado'}
+
+  var html = ''
+  html += '<div style="background:#FFF4EF;border-radius:12px;padding:12px;margin-bottom:16px">'
+  html += '<div style="font-size:12px;font-weight:700;color:#FF4D00;margin-bottom:4px">'+(estadoLabels[p.estado]||p.estado)+'</div>'
+  html += '<div style="font-size:15px;font-weight:700;color:#1A1A1A">'+clienteNombre+'</div>'
+  html += '<div style="font-size:12px;color:#888;margin-top:2px">📞 '+clienteTel+' &nbsp;·&nbsp; 🕐 '+hora+'</div>'
+  html += '</div>'
+
+  html += '<div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Productos</div>'
+  ;(p.items||[]).forEach(function(item){
+    html += '<div class="detalle-item-row">'
+    html += '<span class="detalle-item-nombre">'+item.qty+'× '+item.nombre+'</span>'
+    html += '<span class="detalle-item-precio">$'+Number(item.precio*item.qty).toLocaleString('es-AR')+'</span>'
+    html += '</div>'
+  })
+
+  html += '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #f5f5f5">'
+  if(p.costo_envio>0) html += '<div class="detalle-info-row"><span class="detalle-info-label">🚗 Envío</span><span class="detalle-info-val">$'+Number(p.costo_envio).toLocaleString('es-AR')+'</span></div>'
+  if(p.propina>0) html += '<div class="detalle-info-row"><span class="detalle-info-label">🙌 Propina</span><span class="detalle-info-val">$'+Number(p.propina).toLocaleString('es-AR')+'</span></div>'
+  html += '<div class="detalle-info-row" style="font-weight:700;font-size:14px"><span class="detalle-info-label">Total</span><span class="detalle-info-val" style="color:#FF4D00">$'+Number(p.total).toLocaleString('es-AR')+'</span></div>'
+  html += '</div>'
+
+  html += '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #f5f5f5">'
+  html += '<div class="detalle-info-row"><span class="detalle-info-label">📍 Dirección</span><span class="detalle-info-val">'+p.direccion_entrega+'</span></div>'
+  html += '<div class="detalle-info-row"><span class="detalle-info-label">💳 Pago</span><span class="detalle-info-val">'+p.metodo_pago+'</span></div>'
+  if(p.notas) html += '<div class="detalle-info-row"><span class="detalle-info-label">📝 Notas</span><span class="detalle-info-val">'+p.notas+'</span></div>'
+  html += '</div>'
+
+  if(p.ticket_url){
+    html += '<div style="margin-top:12px"><img src="'+p.ticket_url+'" style="width:100%;border-radius:10px"/></div>'
+  }
+
+  document.getElementById('modal-detalle-titulo').textContent = 'Pedido — '+clienteNombre
+  document.getElementById('modal-detalle-body').innerHTML = html
+  abrirModal('modal-detalle')
 }
 
 function iniciarPollingPedidos(){
@@ -937,7 +1065,6 @@ function iniciarPollingPedidos(){
 
 // ─── RASPADITA ───────────────────────────────────────────────────────────────
 var raspaditaActiva = false
-var premiosLocales = []
 var raspaditaConfigId = null
 
 async function cargarRaspadita(){
@@ -967,38 +1094,10 @@ function toggleRaspadita(){
   renderRaspaditaToggle()
 }
 
-function renderPremios(){
-  var lista = document.getElementById('premios-lista')
-  if(!lista) return
-  if(!premiosLocales.length){ lista.innerHTML='<div style="font-size:12px;color:#ccc;padding:4px 0">Sin premios configurados</div>'; return }
-  lista.innerHTML = premiosLocales.map(function(p,i){
-    return '<div style="display:flex;align-items:center;gap:8px;padding:8px;background:#f9f9f9;border-radius:10px;margin-bottom:6px">'
-      +'<div style="flex:1;font-size:13px;font-weight:600">'+p.nombre+'</div>'
-      +'<div style="font-size:12px;color:#FF4D00;font-weight:700">'+p.probabilidad+'%</div>'
-      +'<button onclick="eliminarPremio('+i+')" style="background:#FFF0F0;border:none;border-radius:20px;padding:4px 10px;color:#E24B4A;font-size:11px;font-weight:700;cursor:pointer">✕</button>'
-      +'</div>'
-  }).join('')
-}
-
-function agregarPremio(){
-  var nombre = document.getElementById('premio-nombre-input').value.trim()
-  var prob = parseFloat(document.getElementById('premio-prob-input').value)||0
-  if(!nombre||!prob) return
-  premiosLocales.push({nombre:nombre, probabilidad:prob})
-  document.getElementById('premio-nombre-input').value=''
-  document.getElementById('premio-prob-input').value=''
-  renderPremios()
-}
-
-function eliminarPremio(i){
-  premiosLocales.splice(i,1); renderPremios()
-}
-
 async function guardarRaspadita(){
   if(!restauranteId) return
   var pct = parseInt(document.getElementById('descuento-porcentaje').value) || 10
   var data = { restaurante_id:restauranteId, activa:raspaditaActiva, descuento_porcentaje:pct }
-  // usar upsert para crear o actualizar
   var r = await sb.from('raspaditas_config').upsert(data, {onConflict:'restaurante_id'})
   await sb.from('restaurantes').update({raspadita_activa:raspaditaActiva}).eq('id',restauranteId)
   var msg = document.getElementById('rasp-msg')
@@ -1006,32 +1105,10 @@ async function guardarRaspadita(){
   else { msg.style.color='#2D6A2D'; msg.textContent='✓ Guardado' }
   msg.style.display='block'
   setTimeout(function(){ msg.style.display='none' },2000)
-  // recargar para confirmar
   await cargarRaspadita()
 }
 
-async function generarRaspadita(pedidoId, clienteId){
-  // verificar si el restaurante tiene raspadita activa
-  var config = await sb.from('raspaditas_config').select('*').eq('restaurante_id',restauranteId).single()
-  if(!config.data||!config.data.activa||!config.data.premios||!config.data.premios.length) return
-  // sortear premio
-  var premios = config.data.premios
-  var total = premios.reduce(function(s,p){ return s+p.probabilidad },0)
-  var rand = Math.random()*total
-  var acum = 0; var ganado = null
-  for(var p of premios){
-    acum += p.probabilidad
-    if(rand <= acum){ ganado = p; break }
-  }
-  if(!ganado) return
-  var esGanadora = !ganado.nombre.toLowerCase().includes('sin premio') && !ganado.nombre.toLowerCase().includes('nada')
-  await sb.from('raspaditas').insert([{
-    pedido_id:pedidoId, cliente_id:clienteId,
-    restaurante_id:restauranteId,
-    premio:ganado.nombre, ganada:esGanadora
-  }])
-}
-
+// ─── MODALES ──────────────────────────────────────────────────────────────────
 function abrirModal(id){ document.getElementById(id).classList.remove('hidden') }
 function cerrarModal(id){ document.getElementById(id).classList.add('hidden') }
 function cerrarModalBg(e,id){ if(e.target.id===id) cerrarModal(id) }
