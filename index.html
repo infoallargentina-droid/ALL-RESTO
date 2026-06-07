@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="ALL Resto"/>
 <meta name="theme-color" content="#FF4D00"/>
 <link rel="manifest" href="manifest.json"/>
-<title>ALL — App Restaurante v1.8</title>
+<title>ALL — App Restaurante v1.9</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -206,7 +206,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
   <div class="restos-body">
     <div class="restos-label">Nuestros restaurantes</div>
     <div id="lista-restos"><div class="loading-text">Cargando restaurantes...</div></div>
-    <div class="version">ALL App Restaurante v1.8</div>
+    <div class="version">ALL App Restaurante v1.9</div>
   </div>
 </div>
 
@@ -237,7 +237,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     <div class="topbar-logo" id="topbar-logo-wrap">🍽</div>
     <div>
       <div class="topbar-name" id="rest-nombre">Restaurante</div>
-      <div class="topbar-sub">Panel del local · v1.8</div>
+      <div class="topbar-sub">Panel del local · v1.9</div>
     </div>
     <div class="estado-badge">
       <div class="dot" id="estado-dot" style="background:#2D6A2D"></div>
@@ -330,7 +330,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     </div>
 
     <button class="btn-main btn-dark" style="margin-top:6px" onclick="cerrarSesion()">Cerrar sesión</button>
-    <div class="version">ALL App Restaurante v1.8</div>
+    <div class="version">ALL App Restaurante v1.9</div>
   </div>
 </div>
 
@@ -902,7 +902,7 @@ async function cargarPedidos(){
   var result = await sb.from('pedidos')
     .select('*,perfiles(nombre,telefono)')
     .eq('restaurante_id', restauranteId)
-    .in('estado', ['nuevo','preparando','camino'])
+    .in('estado', ['nuevo','preparando','en_camino'])
     .order('created_at', {ascending: true})
 
   var todosHoy = await sb.from('pedidos')
@@ -929,8 +929,8 @@ async function cargarPedidos(){
   if(result.error){ lista.innerHTML='<div class="loading-text">Error cargando pedidos</div>'; return }
   if(!pedidos.length){ lista.innerHTML='<div class="loading-text">Sin pedidos activos 🎉</div>'; return }
 
-  var tagClass = {nuevo:'tag-nuevo', preparando:'tag-prep', camino:'tag-camino', entregado:'tag-ok'}
-  var tagLabel = {nuevo:'NUEVO', preparando:'PREPARANDO', camino:'EN CAMINO', entregado:'LISTO'}
+  var tagClass = {nuevo:'tag-nuevo', preparando:'tag-prep', en_camino:'tag-camino', listo:'tag-ok', entregado:'tag-ok'}
+  var tagLabel = {nuevo:'NUEVO', preparando:'PREPARANDO', en_camino:'EN CAMINO', listo:'LISTO', entregado:'ENTREGADO'}
 
   lista.innerHTML = pedidos.map(function(p){
     var items = (p.items||[]).map(function(i){ return i.qty+'× '+i.nombre }).join(' · ')
@@ -971,7 +971,7 @@ async function cargarPedidos(){
     if(p.estado === 'preparando'){
       html += '<button class="btn-accion btn-accion-naranja" style="background:#1565C0" onclick="cambiarEstadoPedido(\''+p.id+'\',\'camino\')">🏍 Enviar al cliente</button>'
     }
-    if(p.estado === 'camino'){
+    if(p.estado === 'en_camino'){
       html += '<button class="btn-accion btn-accion-verde" onclick="cambiarEstadoPedido(\''+p.id+'\',\'entregado\')">✅ Entregado</button>'
     }
     if(p.ticket_url){
@@ -1008,7 +1008,7 @@ async function confirmarRechazo(){
 
 async function cambiarEstadoPedido(pedidoId, nuevoEstado){
   await sb.from('pedidos').update({estado:nuevoEstado}).eq('id',pedidoId)
-  var labels = {camino:'🏍 Pedido en camino', entregado:'✅ Pedido entregado'}
+  var labels = {en_camino:'🏍 Pedido en camino', entregado:'✅ Pedido entregado'}
   if(labels[nuevoEstado]) mostrarToast(labels[nuevoEstado])
   cargarPedidos()
 }
@@ -1020,7 +1020,7 @@ async function abrirDetallePedido(pedidoId){
   var clienteNombre = (p.perfiles && p.perfiles.nombre) ? p.perfiles.nombre : 'Cliente'
   var clienteTel = (p.perfiles && p.perfiles.telefono) ? p.perfiles.telefono : '–'
   var hora = new Date(p.created_at).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})
-  var estadoLabels = {nuevo:'🆕 Nuevo',preparando:'👨‍🍳 Preparando',camino:'🏍 En camino',entregado:'✅ Entregado',cancelado:'❌ Cancelado'}
+  var estadoLabels = {nuevo:'🆕 Nuevo',preparando:'👨‍🍳 Preparando',en_camino:'🏍 En camino',listo:'✅ Listo',entregado:'✅ Entregado',cancelado:'❌ Cancelado'}
 
   var html = ''
   html += '<div style="background:#FFF4EF;border-radius:12px;padding:12px;margin-bottom:16px">'
