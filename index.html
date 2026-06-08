@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="ALL Resto"/>
 <meta name="theme-color" content="#FF4D00"/>
 <link rel="manifest" href="manifest.json"/>
-<title>ALL — App Restaurante v2.3</title>
+<title>ALL — App Restaurante v2.4</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -247,7 +247,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
   <div class="restos-body">
     <div class="restos-label">Nuestros restaurantes</div>
     <div id="lista-restos"><div class="loading-text">Cargando restaurantes...</div></div>
-    <div class="version">ALL App Restaurante v2.3</div>
+    <div class="version">ALL App Restaurante v2.4</div>
   </div>
 </div>
 
@@ -278,7 +278,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     <div class="topbar-logo" id="topbar-logo-wrap">🍽</div>
     <div>
       <div class="topbar-name" id="rest-nombre">Restaurante</div>
-      <div class="topbar-sub">Panel del local · v2.3</div>
+      <div class="topbar-sub">Panel del local · v2.4</div>
     </div>
     <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px">
       <div class="estado-badge">
@@ -373,6 +373,35 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
       <div id="rasp-msg" style="font-size:11px;color:#2D6A2D;margin-top:8px;text-align:center;display:none">✓ Guardado</div>
     </div>
 
+    <!-- MODALIDADES DE ENTREGA -->
+    <div class="cats-section">
+      <div class="cats-title"><span>🚀 Modalidades de entrega</span></div>
+      <div style="font-size:12px;color:#888;margin-bottom:14px">Elegí cómo pueden recibir sus pedidos los clientes.</div>
+
+      <div class="toggle-row" style="margin-bottom:10px">
+        <div>
+          <div class="toggle-label">🏍 Delivery</div>
+          <div class="toggle-sub">Enviás el pedido al domicilio del cliente</div>
+        </div>
+        <div class="toggle-track" id="modal-delivery-track" style="background:#2D6A2D" onclick="toggleModalidad('delivery')">
+          <div class="toggle-thumb" id="modal-delivery-thumb" style="left:23px"></div>
+        </div>
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">🏃 Retiro en local</div>
+          <div class="toggle-sub">El cliente viene a buscar su pedido</div>
+        </div>
+        <div class="toggle-track" id="modal-retiro-track" style="background:#ddd" onclick="toggleModalidad('retiro')">
+          <div class="toggle-thumb" id="modal-retiro-thumb" style="left:3px"></div>
+        </div>
+      </div>
+
+      <button class="btn-main" style="margin-top:14px" onclick="guardarModalidades()">Guardar</button>
+      <div id="modalidades-msg" style="font-size:11px;color:#2D6A2D;margin-top:8px;text-align:center;display:none">✓ Guardado</div>
+    </div>
+
     <!-- HORARIOS DE ATENCIÓN -->
     <div class="cats-section">
       <div class="cats-title">
@@ -385,7 +414,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     </div>
 
     <button class="btn-main btn-dark" style="margin-top:6px" onclick="cerrarSesion()">Cerrar sesión</button>
-    <div class="version">ALL App Restaurante v2.3</div>
+    <div class="version">ALL App Restaurante v2.4</div>
   </div>
 </div>
 
@@ -625,7 +654,7 @@ function switchTab(tab,el){
     document.getElementById('tab-'+t).classList[t===tab?'remove':'add']('hidden')
   })
   if(tab==='menu') cargarMenu()
-  if(tab==='local'){ cargarLogoLocal(); cargarCategorias(); cargarRaspadita(); cargarHorarios() }
+  if(tab==='local'){ cargarLogoLocal(); cargarCategorias(); cargarRaspadita(); cargarHorarios(); cargarModalidades() }
   if(tab==='pedidos') iniciarPollingPedidos()
 }
 
@@ -1316,6 +1345,50 @@ function iniciarPollingPedidos(){
   cargarPedidos()
   if(pedidosInterval) clearInterval(pedidosInterval)
   pedidosInterval = setInterval(cargarPedidos, 10000)
+}
+
+// ─── MODALIDADES ─────────────────────────────────────────────────────────────
+var modalidadesActuales = { delivery: true, retiro: false }
+
+async function cargarModalidades(){
+  if(!restauranteId) return
+  var r = await sb.from('restaurantes').select('modalidades_entrega').eq('id',restauranteId).single()
+  if(r.data && r.data.modalidades_entrega){
+    modalidadesActuales = r.data.modalidades_entrega
+  }
+  renderModalidades()
+}
+
+function renderModalidades(){
+  var tipos = ['delivery','retiro']
+  tipos.forEach(function(tipo){
+    var track = document.getElementById('modal-'+tipo+'-track')
+    var thumb = document.getElementById('modal-'+tipo+'-thumb')
+    if(!track) return
+    var activo = modalidadesActuales[tipo]
+    track.style.background = activo ? '#2D6A2D' : '#ddd'
+    thumb.style.left = activo ? '23px' : '3px'
+  })
+}
+
+function toggleModalidad(tipo){
+  var otraActiva = tipo === 'delivery' ? modalidadesActuales.retiro : modalidadesActuales.delivery
+  if(modalidadesActuales[tipo] && !otraActiva){
+    mostrarToast('Debe tener al menos una modalidad activa')
+    return
+  }
+  modalidadesActuales[tipo] = !modalidadesActuales[tipo]
+  renderModalidades()
+}
+
+async function guardarModalidades(){
+  if(!restauranteId) return
+  var r = await sb.from('restaurantes').update({ modalidades_entrega: modalidadesActuales }).eq('id', restauranteId)
+  var msg = document.getElementById('modalidades-msg')
+  if(r.error){ msg.style.color='#E24B4A'; msg.textContent='Error guardando' }
+  else { msg.style.color='#2D6A2D'; msg.textContent='✓ Guardado' }
+  msg.style.display='block'
+  setTimeout(function(){ msg.style.display='none' },2000)
 }
 
 // ─── RASPADITA ───────────────────────────────────────────────────────────────
