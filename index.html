@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -10,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="ALL Resto"/>
 <meta name="theme-color" content="#FF4D00"/>
 <link rel="manifest" href="manifest.json"/>
-<title>ALL — App Restaurante v2.4</title>
+<title>ALL — App Restaurante v2.5</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -103,26 +104,38 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 
 /* MENU */
 .menu-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.cat-label{font-size:11px;font-weight:700;color:#FF4D00;letter-spacing:1px;text-transform:uppercase;margin:16px 0 8px}
+.cat-label{font-size:11px;font-weight:700;color:#FF4D00;letter-spacing:1px;text-transform:uppercase;margin:16px 0 6px;padding:0 2px}
 .btn-nueva-cat{padding:7px 14px;border-radius:20px;background:#FFF4EF;color:#FF4D00;border:1px solid #FFE8DC;font-size:12px;font-weight:600;cursor:pointer}
 
-.prod-card{background:#fff;border-radius:14px;border:1px solid #FFE8DC;margin-bottom:10px;overflow:hidden;position:relative}
-.prod-img-wrap{width:100%;height:140px;background:#f5f5f5;position:relative;overflow:hidden}
-.prod-img{width:100%;height:100%;object-fit:cover}
-.prod-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px;background:#FFF4EF;color:#FF4D00}
-.prod-badge-promo{position:absolute;top:10px;left:10px;background:#FF4D00;color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px}
-.prod-badge-nodisponible{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700}
-.prod-body{padding:12px 14px}
-.prod-nombre{font-size:14px;font-weight:700;color:#1A1A1A}
-.prod-desc{font-size:12px;color:#888;margin-top:3px;line-height:1.4}
-.prod-cat-badge{font-size:10px;font-weight:600;color:#FF4D00;background:#FFF4EF;padding:2px 8px;border-radius:20px;display:inline-block;margin-top:4px}
-.prod-precios{display:flex;align-items:center;gap:8px;margin-top:8px}
-.prod-precio{font-size:16px;font-weight:700;color:#FF4D00}
-.prod-precio-original{font-size:13px;color:#aaa;text-decoration:line-through}
-.prod-promo-info{font-size:10px;color:#2D6A2D;background:#E8F5E9;padding:2px 8px;border-radius:20px;margin-top:4px;display:inline-block}
-.prod-actions{display:flex;gap:6px;padding:10px 14px;border-top:1px solid #FFE8DC;flex-wrap:wrap;align-items:center}
+.prod-card{background:#fff;border-radius:12px;border:1px solid #FFE8DC;margin-bottom:7px;overflow:hidden;position:relative;display:flex;align-items:stretch}
+.prod-img-wrap{width:72px;height:72px;flex-shrink:0;background:#f5f5f5;position:relative;overflow:hidden;border-radius:10px;margin:8px;align-self:center}
+.prod-img{width:100%;height:100%;object-fit:cover;border-radius:8px}
+.prod-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px;background:#FFF4EF;color:#FF4D00;border-radius:8px}
+.prod-badge-promo{position:absolute;top:4px;left:4px;background:#FF4D00;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px}
+.prod-badge-nodisponible{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;border-radius:8px}
+.prod-body{flex:1;padding:10px 8px 6px 2px;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.prod-nombre{font-size:13px;font-weight:700;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prod-desc{font-size:11px;color:#888;margin-top:2px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.prod-cat-badge{font-size:9px;font-weight:600;color:#FF4D00;background:#FFF4EF;padding:2px 6px;border-radius:20px;display:inline-block;margin-top:3px}
+.prod-precios{display:flex;align-items:center;gap:6px;margin-top:4px}
+.prod-precio{font-size:14px;font-weight:700;color:#FF4D00}
+.prod-precio-original{font-size:11px;color:#aaa;text-decoration:line-through}
+.prod-promo-info{font-size:9px;color:#2D6A2D;background:#E8F5E9;padding:2px 6px;border-radius:20px;margin-top:3px;display:inline-block}
+.prod-actions{display:flex;gap:4px;padding:6px 8px;border-top:1px solid #FFE8DC;flex-wrap:wrap;align-items:center;background:#fafafa}
 .prod-orden{display:flex;gap:4px;margin-left:auto}
-.btn-sm{padding:7px 12px;border-radius:20px;border:none;font-size:11px;font-weight:700;cursor:pointer}
+.btn-sm{padding:6px 10px;border-radius:20px;border:none;font-size:11px;font-weight:700;cursor:pointer}
+
+/* ORGANIZACIÓN DE CATEGORÍAS */
+.org-cats-wrap{background:#fff;border-radius:14px;border:1px solid #FFE8DC;padding:16px;margin-bottom:12px}
+.org-cats-title{font-size:14px;font-weight:700;color:#1A1A1A;margin-bottom:4px}
+.org-cats-sub{font-size:12px;color:#888;margin-bottom:14px}
+.org-cat-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fafafa;border-radius:10px;margin-bottom:7px;border:1px solid #f0f0f0}
+.org-cat-drag{font-size:18px;color:#ccc;cursor:grab;flex-shrink:0}
+.org-cat-nombre{flex:1;font-size:13px;font-weight:600;color:#1A1A1A}
+.org-cat-count{font-size:11px;color:#aaa;font-weight:600}
+.org-cat-btns{display:flex;gap:4px}
+.org-cat-btn{width:28px;height:28px;border-radius:8px;border:none;background:#f0f0f0;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.org-cat-btn:active{background:#FFE8DC}
 .btn-sm-naranja{background:#FFF0E5;color:#FF4D00}
 .btn-sm-verde{background:#E8F5E9;color:#2D6A2D}
 .btn-sm-gris{background:#f5f5f5;color:#888}
@@ -278,7 +291,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     <div class="topbar-logo" id="topbar-logo-wrap">🍽</div>
     <div>
       <div class="topbar-name" id="rest-nombre">Restaurante</div>
-      <div class="topbar-sub">Panel del local · v2.4</div>
+      <div class="topbar-sub">Panel del local · v2.5</div>
     </div>
     <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px">
       <div class="estado-badge">
@@ -320,7 +333,25 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
       <div style="font-size:13px;font-weight:600;color:#1A1A1A">Gestión del menú</div>
       <button class="btn-nueva-cat" onclick="abrirNuevoProducto()">+ Producto</button>
     </div>
-    <div id="lista-menu"><div class="loading-text">Cargando menú...</div></div>
+    <!-- Sub-tabs -->
+    <div style="display:flex;gap:6px;margin-bottom:12px">
+      <button id="subtab-btn-productos" onclick="switchMenuSubtab('productos')" style="flex:1;padding:9px;border-radius:20px;font-size:12px;font-weight:700;border:none;background:#FF4D00;color:#fff;cursor:pointer">🍽 Productos</button>
+      <button id="subtab-btn-organizar" onclick="switchMenuSubtab('organizar')" style="flex:1;padding:9px;border-radius:20px;font-size:12px;font-weight:700;border:none;background:#f5f5f5;color:#888;cursor:pointer">📂 Organizar</button>
+    </div>
+    <!-- Lista productos -->
+    <div id="subtab-productos">
+      <div id="lista-menu"><div class="loading-text">Cargando menú...</div></div>
+    </div>
+    <!-- Organizar categorías -->
+    <div id="subtab-organizar" style="display:none">
+      <div class="org-cats-wrap">
+        <div class="org-cats-title">📂 Orden de categorías</div>
+        <div class="org-cats-sub">Usá las flechas para cambiar el orden en que aparecen en el menú y en la app de pedidos.</div>
+        <div id="org-cats-lista"></div>
+        <button class="btn-main" style="margin-top:8px" onclick="guardarOrdenCats()">Guardar orden</button>
+        <div id="org-cats-msg" style="font-size:11px;color:#2D6A2D;margin-top:8px;text-align:center;display:none">✓ Orden guardado</div>
+      </div>
+    </div>
   </div>
 
   <!-- TAB LOCAL -->
@@ -774,6 +805,60 @@ async function guardarCategorias(){
 }
 
 // ─── MENÚ ──────────────────────────────────────────────────────────────────────
+function switchMenuSubtab(tab){
+  document.getElementById('subtab-productos').style.display = tab==='productos' ? 'block' : 'none'
+  document.getElementById('subtab-organizar').style.display = tab==='organizar' ? 'block' : 'none'
+  document.getElementById('subtab-btn-productos').style.background = tab==='productos' ? '#FF4D00' : '#f5f5f5'
+  document.getElementById('subtab-btn-productos').style.color = tab==='productos' ? '#fff' : '#888'
+  document.getElementById('subtab-btn-organizar').style.background = tab==='organizar' ? '#FF4D00' : '#f5f5f5'
+  document.getElementById('subtab-btn-organizar').style.color = tab==='organizar' ? '#fff' : '#888'
+  if(tab==='organizar') renderOrgCats()
+}
+
+async function renderOrgCats(){
+  var lista = document.getElementById('org-cats-lista')
+  if(!lista) return
+  // Contar productos por categoría
+  var res = await sb.from('productos').select('categoria').eq('restaurante_id', restauranteId)
+  var conteo = {}
+  if(res.data) res.data.forEach(function(p){ conteo[p.categoria] = (conteo[p.categoria]||0)+1 })
+
+  // Asegurar que todas las categorías con productos estén en categoriasLocales
+  Object.keys(conteo).forEach(function(c){ if(!categoriasLocales.includes(c)) categoriasLocales.push(c) })
+
+  lista.innerHTML = categoriasLocales.map(function(cat, i){
+    return '<div class="org-cat-item" id="orgcat-'+i+'">'
+      +'<span class="org-cat-drag">☰</span>'
+      +'<div class="org-cat-nombre">'+cat+'</div>'
+      +'<div class="org-cat-count">'+(conteo[cat]||0)+' productos</div>'
+      +'<div class="org-cat-btns">'
+      +(i>0?'<button class="org-cat-btn" onclick="moverCat('+i+',-1)">↑</button>':'<div style="width:28px"></div>')
+      +(i<categoriasLocales.length-1?'<button class="org-cat-btn" onclick="moverCat('+i+',1)">↓</button>':'<div style="width:28px"></div>')
+      +'</div>'
+      +'</div>'
+  }).join('')
+}
+
+function moverCat(idx, dir){
+  var newIdx = idx + dir
+  if(newIdx < 0 || newIdx >= categoriasLocales.length) return
+  var tmp = categoriasLocales[idx]
+  categoriasLocales[idx] = categoriasLocales[newIdx]
+  categoriasLocales[newIdx] = tmp
+  renderOrgCats()
+}
+
+async function guardarOrdenCats(){
+  if(!restauranteId) return
+  var r = await sb.from('restaurantes').update({categorias_menu: categoriasLocales}).eq('id', restauranteId)
+  var msg = document.getElementById('org-cats-msg')
+  if(r.error){ msg.style.color='#E24B4A'; msg.textContent='Error guardando' }
+  else { msg.style.color='#2D6A2D'; msg.textContent='✓ Orden guardado' }
+  msg.style.display='block'
+  setTimeout(function(){ msg.style.display='none' }, 2000)
+  cargarMenu()
+}
+
 async function cargarMenu(){
   var lista=document.getElementById('lista-menu')
   lista.innerHTML='<div class="loading-text">Cargando menú...</div>'
