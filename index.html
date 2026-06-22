@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -600,14 +601,26 @@ async function cargarListaRestos(){
   }).join('')
 }
 
-sb.auth.getSession().then(function(res){
+sb.auth.getSession().then(async function(res){
   if(res.data.session){
-    var meta = res.data.session.user.user_metadata
-    if(meta && meta.resto_nombre){
-      restoActual = meta
-      if(meta.resto_id) restauranteId = meta.resto_id
-      mostrarPanel(meta.resto_nombre, meta.resto_emoji||'🍽', meta.resto_cat||'', meta.resto_logo||'')
-    } else { cargarListaRestos() }
+    var meta = res.data.session.user.user_metadata || {}
+    var idsUsuario = []
+    if(meta.resto_id) idsUsuario.push(meta.resto_id)
+    if(Array.isArray(meta.restos_ids)) idsUsuario = idsUsuario.concat(meta.restos_ids)
+
+    if(idsUsuario.length && meta.resto_id){
+      // Verificamos contra la base que el restaurante todavía existe y coincide
+      var check = await sb.from('restaurantes').select('id,nombre,categoria,logo_url').eq('id',meta.resto_id).single()
+      if(check.data){
+        restoActual = {resto_nombre:check.data.nombre,resto_emoji:meta.resto_emoji||'🍽',resto_cat:check.data.categoria||'',resto_id:check.data.id,resto_logo:check.data.logo_url||''}
+        restauranteId = check.data.id
+        mostrarPanel(restoActual.resto_nombre, restoActual.resto_emoji, restoActual.resto_cat, restoActual.resto_logo)
+      } else {
+        await sb.auth.signOut(); cargarListaRestos()
+      }
+    } else {
+      await sb.auth.signOut(); cargarListaRestos()
+    }
   } else { cargarListaRestos() }
 })
 
@@ -637,8 +650,28 @@ async function ingresar(){
   var result = await sb.auth.signInWithPassword({email:email,password:pass})
   if(result.error){ err.style.display='block'; err.textContent='Email o contraseña incorrectos'; btn.textContent='Ingresar →'; return }
   btn.textContent='Ingresar →'
-  var meta = result.data.user.user_metadata
-  if(meta && meta.resto_id) restauranteId = meta.resto_id
+  var meta = result.data.user.user_metadata || {}
+
+  // Validar que el usuario sea encargado y pertenezca al restaurante elegido en pantalla
+  var idsUsuario = []
+  if(meta.resto_id) idsUsuario.push(meta.resto_id)
+  if(Array.isArray(meta.restos_ids)) idsUsuario = idsUsuario.concat(meta.restos_ids)
+
+  if(!idsUsuario.length){
+    await sb.auth.signOut()
+    err.style.display='block'; err.textContent='Este usuario no tiene un local asignado. Pedile al administrador que te configure el acceso.'
+    restauranteId=null; restoActual=null
+    return
+  }
+
+  if(!restoActual || !restoActual.resto_id || idsUsuario.indexOf(restoActual.resto_id)===-1){
+    await sb.auth.signOut()
+    err.style.display='block'; err.textContent='Tu usuario no tiene acceso a este local. Volvé y elegí el local correcto.'
+    restauranteId=null; restoActual=null
+    return
+  }
+
+  restauranteId = restoActual.resto_id
   mostrarPanel(restoActual.resto_nombre, restoActual.resto_emoji, restoActual.resto_cat, restoActual.resto_logo||'')
 }
 
@@ -651,18 +684,6 @@ async function mostrarPanel(nombre,emoji,cat,logoUrl){
   document.getElementById('screen-login').style.display='none'
   document.getElementById('screen-restos').style.display='none'
   var p=document.getElementById('screen-panel'); p.style.display='flex'; p.style.flexDirection='column'
-  if(!restauranteId){
-    if(restoActual && restoActual.resto_id){ restauranteId=restoActual.resto_id }
-    else {
-      var session=await sb.auth.getSession()
-      var meta=session.data.session && session.data.session.user.user_metadata
-      if(meta && meta.resto_id){ restauranteId=meta.resto_id }
-      else {
-        var r=await sb.from('restaurantes').select('id').eq('nombre',nombre).single()
-        if(r.data) restauranteId=r.data.id
-      }
-    }
-  }
   cargarLogoLocal(logoUrl)
   cargarCategorias()
   cargarHorarios()
