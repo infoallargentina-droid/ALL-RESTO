@@ -472,6 +472,22 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
   </div>
 </div>
 
+<!-- MODAL PROPONER HORA -->
+<div id="modal-proponer-hora" class="modal-bg hidden" onclick="cerrarModalBg(event,'modal-proponer-hora')">
+  <div class="modal">
+    <div class="modal-title">
+      <span>🕐 Proponer otra hora</span>
+      <span class="modal-close" onclick="cerrarModal('modal-proponer-hora')">✕</span>
+    </div>
+    <input type="hidden" id="proponer-hora-pedido-id"/>
+    <div class="field-label">Hora de entrega que podés ofrecer</div>
+    <input type="time" id="proponer-hora-input" class="input" style="font-size:22px;text-align:center;padding:16px"/>
+    <div style="font-size:12px;color:#888;margin-bottom:16px">El cliente verá la nueva hora propuesta en su app y quedará el pedido como "nuevo" para que lo aceptes cuando llegue el momento.</div>
+    <button class="btn-main" style="margin-top:8px" onclick="confirmarProponerHora()">Enviar propuesta al cliente</button>
+    <button style="width:100%;padding:14px;background:#f5f5f5;color:#1A1A1A;border:none;border-radius:14px;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px" onclick="cerrarModal('modal-proponer-hora')">Cancelar</button>
+  </div>
+</div>
+
 <!-- MODAL DETALLE PEDIDO -->
 <div id="modal-detalle" class="modal-bg hidden" onclick="cerrarModalBg(event,'modal-detalle')">
   <div class="modal">
@@ -1296,6 +1312,14 @@ async function cargarPedidos(){
     html += '<div style="font-size:10px;color:#aaa;margin-top:2px">Tocá para ver detalle</div>'
     html += '</div></div>'
 
+    // BADGE HORA PROGRAMADA
+    if(p.hora_pedido && p.hora_pedido !== 'ahora' && p.hora_entrega_esperada){
+      var hEsp = new Date(p.hora_entrega_esperada)
+      var hh = hEsp.getHours().toString().padStart(2,'0')
+      var mm = hEsp.getMinutes().toString().padStart(2,'0')
+      html += '<div style="padding:6px 14px;background:#FFF3EE;border-bottom:1px solid #FFE8DC;font-size:12px;font-weight:700;color:#FF4D00">📅 Pedido programado para las '+hh+':'+mm+' hs</div>'
+    }
+
     // ITEMS — también clickeable
     html += '<div class="pedido-items" style="cursor:pointer" onclick="abrirDetallePedido(\''+p.id+'\')">'+items+'</div>'
 
@@ -1309,6 +1333,9 @@ async function cargarPedidos(){
     html += '<div class="pedido-acciones">'
     if(p.estado === 'nuevo'){
       html += '<button class="btn-accion btn-accion-verde" onclick="aceptarPedido(\''+p.id+'\')">✅ Aceptar</button>'
+      if(p.hora_pedido && p.hora_pedido !== 'ahora'){
+        html += '<button class="btn-accion btn-accion-naranja" onclick="abrirProponerHora(\''+p.id+'\')">🕐 Proponer hora</button>'
+      }
       html += '<button class="btn-accion btn-accion-rojo" onclick="abrirRechazo(\''+p.id+'\')">❌ Rechazar</button>'
     }
     if(p.estado === 'preparando'){
@@ -1346,6 +1373,32 @@ async function confirmarRechazo(){
   }).eq('id', pedidoId)
   cerrarModal('modal-rechazo')
   if(!r.error) mostrarToast('❌ Pedido rechazado')
+  cargarPedidos()
+}
+
+function abrirProponerHora(pedidoId){
+  document.getElementById('proponer-hora-pedido-id').value = pedidoId
+  // Sugerir la hora original del pedido +15min como default
+  var ahora = new Date()
+  var hh = ahora.getHours().toString().padStart(2,'0')
+  var mm = ahora.getMinutes().toString().padStart(2,'0')
+  document.getElementById('proponer-hora-input').value = hh+':'+mm
+  abrirModal('modal-proponer-hora')
+}
+
+async function confirmarProponerHora(){
+  var pedidoId = document.getElementById('proponer-hora-pedido-id').value
+  var horaInput = document.getElementById('proponer-hora-input').value
+  if(!horaInput){ mostrarToast('Ingresá una hora'); return }
+  var hoy = new Date()
+  var partes = horaInput.split(':')
+  var fechaAlt = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), parseInt(partes[0]), parseInt(partes[1]))
+  var r = await sb.from('pedidos').update({
+    estado: 'nuevo',
+    hora_entrega_alternativa: fechaAlt.toISOString()
+  }).eq('id', pedidoId)
+  cerrarModal('modal-proponer-hora')
+  if(!r.error) mostrarToast('🕐 Hora alternativa enviada al cliente')
   cargarPedidos()
 }
 
