@@ -1304,6 +1304,13 @@ async function cargarAliasTransferencia(){
 async function guardarHorarios(){
   if(!restauranteId) return
   var horarios = {}
+  function normHora(v){
+    if(!v) return '00:00'
+    var partes = v.split(':')
+    var h = (partes[0]||'0').padStart(2,'0')
+    var m = (partes[1]||'00').padStart(2,'0')
+    return h+':'+m
+  }
   DIAS.forEach(function(dia){
     var toggleEl = document.getElementById('htoggle-'+dia.id)
     var activo = toggleEl && toggleEl.style.background !== 'rgb(221, 221, 221)'
@@ -1311,8 +1318,8 @@ async function guardarHorarios(){
     var cierre = document.getElementById('hcierre-'+dia.id)
     horarios[dia.id] = {
       activo: activo,
-      apertura: apertura ? apertura.value : '09:00',
-      cierre: cierre ? cierre.value : '22:00'
+      apertura: normHora(apertura ? apertura.value : '09:00'),
+      cierre: normHora(cierre ? cierre.value : '22:00')
     }
   })
   horariosActuales = horarios
