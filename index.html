@@ -620,7 +620,14 @@ async function cargarListaRestos(){
     var emoji = emojis[r.nombre]||'🍽'
     var ab = r.abierto !== false
     var logoHtml = r.logo_url ? '<img class="resto-btn-logo" src="'+r.logo_url+'"/>' : emoji
-    return '<div class="resto-btn" onclick="seleccionarResto(\''+escQ(r.nombre)+'\',\''+emoji+'\',\''+escQ(r.categoria||'')+'\','+ab+',\''+r.id+'\',\''+escQ(r.logo_url||'')+'\')">'
+    return '<div class="resto-btn" '
+      +'data-id="'+r.id+'" '
+      +'data-nombre="'+r.nombre.replace(/"/g,'&quot;')+'" '
+      +'data-emoji="'+emoji+'" '
+      +'data-cat="'+(r.categoria||'').replace(/"/g,'&quot;')+'" '
+      +'data-ab="'+(ab?'1':'0')+'" '
+      +'data-logo="'+(r.logo_url||'').replace(/"/g,'&quot;')+'" '
+      +'onclick="seleccionarRestoEl(this)">'
       +'<div class="resto-btn-emoji">'+logoHtml+'</div>'
       +'<div class="resto-btn-info"><div class="resto-btn-nombre">'+r.nombre+'</div>'
       +'<div class="resto-btn-cat">'+(r.categoria||'')+'</div>'
@@ -629,23 +636,43 @@ async function cargarListaRestos(){
   }).join('')
 }
 
+function seleccionarRestoEl(el){
+  var restoId = el.getAttribute('data-id')
+  var nombre = el.getAttribute('data-nombre')
+  var emoji = el.getAttribute('data-emoji')
+  var cat = el.getAttribute('data-cat')
+  var logoUrl = el.getAttribute('data-logo')
+  seleccionarResto(nombre, emoji, cat, true, restoId, logoUrl)
+}
+
 sb.auth.getSession().then(async function(res){
   if(res.data.session){
     var meta = res.data.session.user.user_metadata || {}
+    var esAdmin = meta.rol === 'admin' || res.data.session.user.email === 'info.all.argentina@gmail.com'
     var idsUsuario = []
-    if(meta.resto_id) idsUsuario.push(meta.resto_id)
-    if(Array.isArray(meta.restos_ids)) idsUsuario = idsUsuario.concat(meta.restos_ids)
+    if(meta.resto_id) idsUsuario.push(String(meta.resto_id))
+    if(Array.isArray(meta.restos_ids)){
+      meta.restos_ids.forEach(function(r){
+        var id = (typeof r === 'object' && r !== null) ? (r.id||r.resto_id||'') : r
+        if(id) idsUsuario.push(String(id))
+      })
+    }
+    idsUsuario = idsUsuario.filter(function(v,i,a){ return v && a.indexOf(v)===i })
+    var primerRestoId = idsUsuario[0] || meta.resto_id || null
 
-    if(idsUsuario.length && meta.resto_id){
-      // Verificamos contra la base que el restaurante todavía existe y coincide
-      var check = await sb.from('restaurantes').select('id,nombre,categoria,logo_url').eq('id',meta.resto_id).single()
+    if(primerRestoId){
+      var check = await sb.from('restaurantes').select('id,nombre,categoria,logo_url').eq('id',primerRestoId).single()
       if(check.data){
         restoActual = {resto_nombre:check.data.nombre,resto_emoji:meta.resto_emoji||'🍽',resto_cat:check.data.categoria||'',resto_id:check.data.id,resto_logo:check.data.logo_url||''}
         restauranteId = check.data.id
         mostrarPanel(restoActual.resto_nombre, restoActual.resto_emoji, restoActual.resto_cat, restoActual.resto_logo)
       } else {
-        await sb.auth.signOut(); cargarListaRestos()
+        // Restaurante no encontrado — si es admin lo mandamos a elegir, si no cerramos sesión
+        if(esAdmin){ cargarListaRestos() } else { await sb.auth.signOut(); cargarListaRestos() }
       }
+    } else if(esAdmin){
+      // Admin sin resto asignado → que elija desde la pantalla de locales
+      cargarListaRestos()
     } else {
       await sb.auth.signOut(); cargarListaRestos()
     }
@@ -679,11 +706,30 @@ async function ingresar(){
   if(result.error){ err.style.display='block'; err.textContent='Email o contraseña incorrectos'; btn.textContent='Ingresar →'; return }
   btn.textContent='Ingresar →'
   var meta = result.data.user.user_metadata || {}
+  var esAdmin = meta.rol === 'admin' || result.data.user.email === 'info.all.argentina@gmail.com'
 
-  // Validar que el usuario sea encargado y pertenezca al restaurante elegido en pantalla
+  // Admin pasa directo — puede entrar a cualquier local
+  if(esAdmin){
+    if(restoActual && restoActual.resto_id){
+      restauranteId = restoActual.resto_id
+      mostrarPanel(restoActual.resto_nombre, restoActual.resto_emoji, restoActual.resto_cat, restoActual.resto_logo||'')
+    } else {
+      // No eligió local todavía — volver a la pantalla de selección
+      err.style.display='block'; err.textContent='Elegí un local antes de ingresar.'
+    }
+    return
+  }
+
+  // Construir lista de IDs permitidos
   var idsUsuario = []
-  if(meta.resto_id) idsUsuario.push(meta.resto_id)
-  if(Array.isArray(meta.restos_ids)) idsUsuario = idsUsuario.concat(meta.restos_ids)
+  if(meta.resto_id) idsUsuario.push(String(meta.resto_id))
+  if(Array.isArray(meta.restos_ids)){
+    meta.restos_ids.forEach(function(r){
+      var id = (typeof r === 'object' && r !== null) ? (r.id||r.resto_id||'') : r
+      if(id) idsUsuario.push(String(id))
+    })
+  }
+  idsUsuario = idsUsuario.filter(function(v,i,a){ return v && a.indexOf(v)===i })
 
   if(!idsUsuario.length){
     await sb.auth.signOut()
@@ -692,7 +738,7 @@ async function ingresar(){
     return
   }
 
-  if(!restoActual || !restoActual.resto_id || idsUsuario.indexOf(restoActual.resto_id)===-1){
+  if(!restoActual || !restoActual.resto_id || idsUsuario.indexOf(String(restoActual.resto_id))===-1){
     await sb.auth.signOut()
     err.style.display='block'; err.textContent='Tu usuario no tiene acceso a este local. Volvé y elegí el local correcto.'
     restauranteId=null; restoActual=null
