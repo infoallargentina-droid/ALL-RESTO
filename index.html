@@ -367,6 +367,18 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     <div class="info-card"><div class="info-label">Restaurante</div><div class="info-val" id="local-nombre">–</div></div>
     <div class="info-card"><div class="info-label">Categoría</div><div class="info-val" id="local-cat">–</div></div>
 
+    <!-- ALIAS DE TRANSFERENCIA -->
+    <div class="cats-section">
+      <div class="cats-title"><span>🏦 Datos para transferencia</span></div>
+      <div style="font-size:12px;color:#888;margin-bottom:12px">El cliente verá estos datos cuando elija pagar por transferencia.</div>
+      <div class="field-label">Alias o CBU</div>
+      <input type="text" id="alias-transferencia" class="input" placeholder="Ej: milocal.mp o 0000003100..."/>
+      <div class="field-label" style="margin-top:10px">Titular de la cuenta</div>
+      <input type="text" id="titular-transferencia" class="input" placeholder="Ej: Juan Pérez"/>
+      <button class="btn-main" style="margin-top:10px" onclick="guardarAliasTransferencia()">Guardar datos</button>
+      <div id="alias-msg" style="font-size:11px;color:#2D6A2D;margin-top:8px;text-align:center;display:none">✓ Datos guardados</div>
+    </div>
+
     <!-- CATEGORÍAS -->
     <div class="cats-section">
       <div class="cats-title">
@@ -722,7 +734,7 @@ function switchTab(tab,el){
     document.getElementById('tab-'+t).classList[t===tab?'remove':'add']('hidden')
   })
   if(tab==='menu') cargarMenu()
-  if(tab==='local'){ cargarLogoLocal(); cargarCategorias(); cargarRaspadita(); cargarHorarios(); cargarModalidades() }
+  if(tab==='local'){ cargarLogoLocal(); cargarCategorias(); cargarRaspadita(); cargarHorarios(); cargarModalidades(); cargarAliasTransferencia() }
   if(tab==='pedidos') iniciarPollingPedidos()
 }
 
@@ -1124,19 +1136,29 @@ function toggleAbierto(){
   }
 }
 
+function ahoraArgentina(){
+  // Siempre usa timezone de Argentina independientemente del dispositivo/servidor
+  var ahora = new Date()
+  var partes = new Intl.DateTimeFormat('es-AR',{
+    timeZone:'America/Argentina/Buenos_Aires',
+    weekday:'long', hour:'2-digit', minute:'2-digit', hour12:false
+  }).formatToParts(ahora)
+  var dia = partes.find(function(p){ return p.type==='weekday' }).value.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // quitar tildes
+  var hora = parseInt(partes.find(function(p){ return p.type==='hour' }).value)
+  var min = parseInt(partes.find(function(p){ return p.type==='minute' }).value)
+  return { dia: dia, minutos: hora*60 + min }
+}
+
 function calcularEstadoAutomatico(){
   if(!horariosActuales) return true // sin horarios configurados → siempre abierto
-  var ahora = new Date()
-  var diasSemana = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado']
-  var diaActual = diasSemana[ahora.getDay()]
-  var horarioDia = horariosActuales[diaActual]
-  if(!horarioDia || !horarioDia.activo) return false // día no configurado → cerrado
-  var horaActual = ahora.getHours()*60 + ahora.getMinutes()
-  var partes1 = horarioDia.apertura.split(':')
-  var partes2 = horarioDia.cierre.split(':')
-  var apertura = parseInt(partes1[0])*60 + parseInt(partes1[1])
-  var cierre = parseInt(partes2[0])*60 + parseInt(partes2[1])
-  return horaActual >= apertura && horaActual < cierre
+  var ar = ahoraArgentina()
+  var diasMap = {'domingo':'domingo','lunes':'lunes','martes':'martes','miercoles':'miercoles','jueves':'jueves','viernes':'viernes','sabado':'sabado'}
+  var horarioDia = horariosActuales[ar.dia] || horariosActuales[diasMap[ar.dia]]
+  if(!horarioDia || !horarioDia.activo) return false
+  var apertura = parseInt(horarioDia.apertura.split(':')[0])*60 + parseInt(horarioDia.apertura.split(':')[1])
+  var cierre = parseInt(horarioDia.cierre.split(':')[0])*60 + parseInt(horarioDia.cierre.split(':')[1])
+  return ar.minutos >= apertura && ar.minutos < cierre
 }
 
 function aplicarEstadoLocal(){
@@ -1213,6 +1235,24 @@ function toggleDia(diaId){
   horarios[diaId] = h
   horariosActuales = horarios
   renderHorarios()
+}
+
+async function guardarAliasTransferencia(){
+  if(!restauranteId) return
+  var alias = document.getElementById('alias-transferencia').value.trim()
+  var titular = document.getElementById('titular-transferencia').value.trim()
+  var r = await sb.from('restaurantes').update({alias_transferencia:alias, titular_transferencia:titular}).eq('id',restauranteId)
+  var msg = document.getElementById('alias-msg')
+  if(!r.error){ msg.style.display='block'; setTimeout(function(){ msg.style.display='none' },2500) }
+}
+
+async function cargarAliasTransferencia(){
+  if(!restauranteId) return
+  var r = await sb.from('restaurantes').select('alias_transferencia,titular_transferencia').eq('id',restauranteId).single()
+  if(r.data){
+    document.getElementById('alias-transferencia').value = r.data.alias_transferencia || ''
+    document.getElementById('titular-transferencia').value = r.data.titular_transferencia || ''
+  }
 }
 
 async function guardarHorarios(){
