@@ -1394,7 +1394,8 @@ async function cargarPedidos(){
     html += '<div class="pedido-head" style="cursor:pointer" onclick="abrirDetallePedido(\''+p.id+'\')">'
     html += '<div>'
     html += '<div style="display:flex;align-items:center;gap:6px">'
-    html += '<span class="tag '+(tagClass[p.estado]||'tag-nuevo')+'">'+(tagLabel[p.estado]||p.estado.toUpperCase())+'</span>'
+    var estadoLabelMostrar = (p.estado==='en_camino' && p.tipo_entrega==='retiro') ? 'LISTO P/ RETIRAR' : (tagLabel[p.estado]||p.estado.toUpperCase())
+    html += '<span class="tag '+(tagClass[p.estado]||'tag-nuevo')+'">'+estadoLabelMostrar+'</span>'
     html += '<span style="font-size:11px;font-weight:700;color:#aaa">#'+nroPedido+'</span>'
     html += '</div>'
     html += '<div class="pedido-cliente" style="margin-top:4px">'+clienteNombre+'</div>'
@@ -1412,17 +1413,33 @@ async function cargarPedidos(){
       var mm = hEsp.getMinutes().toString().padStart(2,'0')
       html += '<div style="padding:6px 14px;background:#FFF3EE;border-bottom:1px solid #FFE8DC;font-size:12px;font-weight:700;color:#FF4D00">📅 Pedido programado para las '+hh+':'+mm+' hs</div>'
     }
+    // ESTADO DE LA HORA ALTERNATIVA PROPUESTA
+    if(p.hora_entrega_alternativa){
+      var hAlt = new Date(p.hora_entrega_alternativa)
+      var hha = hAlt.getHours().toString().padStart(2,'0')
+      var mma = hAlt.getMinutes().toString().padStart(2,'0')
+      if(p.hora_alt_respondida === 'aceptada'){
+        html += '<div style="padding:6px 14px;background:#E8F5E9;border-bottom:1px solid #d0ecd0;font-size:12px;font-weight:700;color:#2D6A2D">✅ Cliente aceptó tu hora ('+hha+':'+mma+' hs)</div>'
+      } else {
+        html += '<div style="padding:6px 14px;background:#FFF9E5;border-bottom:1px solid #f0e8c0;font-size:12px;font-weight:700;color:#B8860B">⏳ Esperando que el cliente confirme las '+hha+':'+mma+' hs</div>'
+      }
+    }
 
     // ITEMS — también clickeable
     html += '<div class="pedido-items" style="cursor:pointer" onclick="abrirDetallePedido(\''+p.id+'\')">'+items+'</div>'
 
-    // DIRECCIÓN
+    // DIRECCIÓN / RETIRO
     html += '<div style="padding:8px 14px;font-size:11px;color:#888;border-bottom:1px solid #FFE8DC">'
-    html += '📍 '+p.direccion_entrega+' &nbsp;·&nbsp; 💳 '+p.metodo_pago
+    if(p.tipo_entrega==='retiro'){
+      html += '<span style="background:#E8F5E9;color:#2D6A2D;font-weight:700;padding:2px 8px;border-radius:10px">🛍 RETIRO EN LOCAL</span> &nbsp;·&nbsp; 💳 '+p.metodo_pago
+    } else {
+      html += '📍 '+p.direccion_entrega+' &nbsp;·&nbsp; 💳 '+p.metodo_pago
+    }
     if(p.notas) html += '<br>📝 '+p.notas
     html += '</div>'
 
     // BOTONES DE ACCIÓN según estado — NO propagan el click a la card
+    var esRetiro = p.tipo_entrega === 'retiro'
     html += '<div class="pedido-acciones">'
     if(p.estado === 'nuevo'){
       html += '<button class="btn-accion btn-accion-verde" onclick="aceptarPedido(\''+p.id+'\')">✅ Aceptar</button>'
@@ -1432,7 +1449,11 @@ async function cargarPedidos(){
       html += '<button class="btn-accion btn-accion-rojo" onclick="abrirRechazo(\''+p.id+'\')">❌ Rechazar</button>'
     }
     if(p.estado === 'preparando'){
-      html += '<button class="btn-accion btn-accion-naranja" style="background:#1565C0" onclick="cambiarEstadoPedido(\''+p.id+'\',\'en_camino\')">🏍 Enviar al cliente</button>'
+      if(esRetiro){
+        html += '<button class="btn-accion btn-accion-naranja" style="background:#2D6A2D" onclick="cambiarEstadoPedido(\''+p.id+'\',\'en_camino\')">🛍 Listo para retirar</button>'
+      } else {
+        html += '<button class="btn-accion btn-accion-naranja" style="background:#1565C0" onclick="cambiarEstadoPedido(\''+p.id+'\',\'en_camino\')">🏍 Enviar al cliente</button>'
+      }
     }
     if(p.estado === 'en_camino'){
       html += '<button class="btn-accion btn-accion-verde" onclick="cambiarEstadoPedido(\''+p.id+'\',\'entregado\')">✅ Entregado</button>'
@@ -1445,9 +1466,28 @@ async function cargarPedidos(){
   }).join('')
 }
 
+// Envía notificación push al cliente vía Edge Function (la API key está segura en el servidor)
+async function enviarNotificacion(clienteId, titulo, mensaje){
+  if(!clienteId) return
+  try {
+    await fetch('https://rkinieckmmlvldnccbzm.supabase.co/functions/v1/notificar-pedido', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJraW5pZWNrbW1sdmxkbmNjYnptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM1NTQsImV4cCI6MjA5NTgxOTU1NH0.Mb82xSMu5KSwgju-rUEh-BBWNVLmJ3Fso5EZy4QeOvs'
+      },
+      body: JSON.stringify({ cliente_id: clienteId, titulo: titulo, mensaje: mensaje })
+    })
+  } catch(e){ console.log('Notif error:', e) }
+}
+
 async function aceptarPedido(pedidoId){
   var r = await sb.from('pedidos').update({estado:'preparando'}).eq('id',pedidoId)
-  if(!r.error) mostrarToast('✅ Pedido aceptado — en preparación')
+  if(!r.error){
+    mostrarToast('✅ Pedido aceptado — en preparación')
+    var ped = await sb.from('pedidos').select('cliente_id').eq('id',pedidoId).single()
+    if(ped.data) enviarNotificacion(ped.data.cliente_id, '✅ ¡Pedido aceptado!', 'El local aceptó tu pedido y ya lo está preparando.')
+  }
   cargarPedidos()
 }
 
@@ -1465,7 +1505,11 @@ async function confirmarRechazo(){
     motivo_cancelacion: motivo
   }).eq('id', pedidoId)
   cerrarModal('modal-rechazo')
-  if(!r.error) mostrarToast('❌ Pedido rechazado')
+  if(!r.error){
+    mostrarToast('❌ Pedido rechazado')
+    var ped = await sb.from('pedidos').select('cliente_id').eq('id',pedidoId).single()
+    if(ped.data) enviarNotificacion(ped.data.cliente_id, '❌ Pedido rechazado', motivo)
+  }
   cargarPedidos()
 }
 
@@ -1499,6 +1543,19 @@ async function cambiarEstadoPedido(pedidoId, nuevoEstado){
   await sb.from('pedidos').update({estado:nuevoEstado}).eq('id',pedidoId)
   var labels = {en_camino:'🏍 Pedido en camino', entregado:'✅ Pedido entregado'}
   if(labels[nuevoEstado]) mostrarToast(labels[nuevoEstado])
+  // Notificar al cliente
+  var ped = await sb.from('pedidos').select('cliente_id,tipo_entrega').eq('id',pedidoId).single()
+  if(ped.data){
+    if(nuevoEstado==='en_camino'){
+      if(ped.data.tipo_entrega==='retiro'){
+        enviarNotificacion(ped.data.cliente_id, '🛍 ¡Listo para retirar!', 'Tu pedido está listo. Podés pasar a retirarlo por el local.')
+      } else {
+        enviarNotificacion(ped.data.cliente_id, '🏍 ¡En camino!', 'Tu pedido salió del local y está en camino.')
+      }
+    } else if(nuevoEstado==='entregado'){
+      enviarNotificacion(ped.data.cliente_id, '✅ ¡Entregado!', 'Tu pedido fue entregado. ¡Que lo disfrutes!')
+    }
+  }
   cargarPedidos()
 }
 
