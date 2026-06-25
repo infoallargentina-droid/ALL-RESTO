@@ -480,6 +480,12 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
       <button style="padding:10px;background:#f5f5f5;border:none;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;color:#555" onclick="document.getElementById('rechazo-motivo').value='Demasiados pedidos en este momento'">Mucha demanda</button>
     </div>
     <button class="btn-main" style="background:#E24B4A;margin-top:8px" onclick="confirmarRechazo()">Confirmar rechazo</button>
+    <div style="display:flex;align-items:center;gap:10px;margin:14px 0">
+      <div style="flex:1;height:1px;background:#eee"></div>
+      <span style="font-size:11px;color:#aaa;font-weight:600">O EN VEZ DE RECHAZAR</span>
+      <div style="flex:1;height:1px;background:#eee"></div>
+    </div>
+    <button class="btn-main" style="background:#FF8C00" onclick="proponerHoraDesdeRechazo()">🕐 Proponer otro horario al cliente</button>
     <button style="width:100%;padding:14px;background:#f5f5f5;color:#1A1A1A;border:none;border-radius:14px;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px" onclick="cerrarModal('modal-rechazo')">Cancelar</button>
   </div>
 </div>
@@ -1443,9 +1449,7 @@ async function cargarPedidos(){
     html += '<div class="pedido-acciones">'
     if(p.estado === 'nuevo'){
       html += '<button class="btn-accion btn-accion-verde" onclick="aceptarPedido(\''+p.id+'\')">✅ Aceptar</button>'
-      if(p.hora_pedido && p.hora_pedido !== 'ahora'){
-        html += '<button class="btn-accion btn-accion-naranja" onclick="abrirProponerHora(\''+p.id+'\')">🕐 Proponer hora</button>'
-      }
+      html += '<button class="btn-accion btn-accion-naranja" style="background:#FF8C00" onclick="abrirProponerHora(\''+p.id+'\')">🕐 Proponer hora</button>'
       html += '<button class="btn-accion btn-accion-rojo" onclick="abrirRechazo(\''+p.id+'\')">❌ Rechazar</button>'
     }
     if(p.estado === 'preparando'){
@@ -1513,6 +1517,12 @@ async function confirmarRechazo(){
   cargarPedidos()
 }
 
+function proponerHoraDesdeRechazo(){
+  var pedidoId = document.getElementById('rechazo-pedido-id').value
+  cerrarModal('modal-rechazo')
+  abrirProponerHora(pedidoId)
+}
+
 function abrirProponerHora(pedidoId){
   document.getElementById('proponer-hora-pedido-id').value = pedidoId
   // Sugerir la hora original del pedido +15min como default
@@ -1532,10 +1542,15 @@ async function confirmarProponerHora(){
   var fechaAlt = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), parseInt(partes[0]), parseInt(partes[1]))
   var r = await sb.from('pedidos').update({
     estado: 'nuevo',
-    hora_entrega_alternativa: fechaAlt.toISOString()
+    hora_entrega_alternativa: fechaAlt.toISOString(),
+    hora_alt_respondida: null
   }).eq('id', pedidoId)
   cerrarModal('modal-proponer-hora')
-  if(!r.error) mostrarToast('🕐 Hora alternativa enviada al cliente')
+  if(!r.error){
+    mostrarToast('🕐 Hora alternativa enviada al cliente')
+    var ped = await sb.from('pedidos').select('cliente_id').eq('id',pedidoId).single()
+    if(ped.data) enviarNotificacion(ped.data.cliente_id, '🕐 El local propone otra hora', 'Tocá para ver la nueva hora propuesta y confirmá si te sirve.')
+  }
   cargarPedidos()
 }
 
