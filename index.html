@@ -1357,6 +1357,16 @@ async function cargarPedidos(){
     .in('estado', ['nuevo','preparando','en_camino'])
     .order('created_at', {ascending: false})
 
+  // Cancelaciones recientes hechas POR EL CLIENTE (últimas 2hs) para avisar al encargado
+  var hace2h = new Date(Date.now() - 2*60*60*1000).toISOString()
+  var canceladosCliente = await sb.from('pedidos')
+    .select('*,perfiles(nombre,telefono)')
+    .eq('restaurante_id', restauranteId)
+    .eq('estado', 'cancelado')
+    .eq('cancelado_por', 'cliente')
+    .gte('updated_at', hace2h)
+    .order('created_at', {ascending: false})
+
   var todosHoy = await sb.from('pedidos')
     .select('total,estado')
     .eq('restaurante_id', restauranteId)
@@ -1364,6 +1374,9 @@ async function cargarPedidos(){
 
   var pedidosHoy = todosHoy.data || []
   var pedidos = result.data || []
+  var pedidosCancelCliente = canceladosCliente.data || []
+  // Mostrar primero los cancelados por cliente (aviso) y luego los activos
+  var pedidosMostrar = pedidosCancelCliente.concat(pedidos)
   var nuevos = pedidos.filter(function(p){ return p.estado==='nuevo' }).length
   var ingresos = pedidosHoy.filter(function(p){ return p.estado==='entregado' }).reduce(function(s,p){ return s+p.total },0)
 
@@ -1381,12 +1394,26 @@ async function cargarPedidos(){
 
   var lista = document.getElementById('lista-pedidos-activos')
   if(result.error){ lista.innerHTML='<div class="loading-text">Error cargando pedidos</div>'; return }
-  if(!pedidos.length){ lista.innerHTML='<div class="loading-text">Sin pedidos activos 🎉</div>'; return }
+  if(!pedidosMostrar.length){ lista.innerHTML='<div class="loading-text">Sin pedidos activos 🎉</div>'; return }
 
   var tagClass = {nuevo:'tag-nuevo', preparando:'tag-prep', en_camino:'tag-camino', listo:'tag-ok', entregado:'tag-ok'}
   var tagLabel = {nuevo:'NUEVO', preparando:'PREPARANDO', en_camino:'EN CAMINO', listo:'LISTO', entregado:'ENTREGADO'}
 
-  lista.innerHTML = pedidos.map(function(p){
+  lista.innerHTML = pedidosMostrar.map(function(p){
+    // Card especial para pedidos cancelados por el cliente
+    if(p.estado==='cancelado'){
+      var itemsC = (p.items||[]).map(function(i){ return i.qty+'× '+i.nombre }).join(' · ')
+      var nroC = p.id.substring(0,8).toUpperCase()
+      var clienteC = (p.perfiles && p.perfiles.nombre) ? p.perfiles.nombre : 'Cliente'
+      return '<div class="pedido-card" style="border:2px solid #E24B4A;background:#FFF5F5">'
+        +'<div style="padding:12px 14px">'
+        +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span class="tag" style="background:#FFE0E0;color:#E24B4A">✕ CANCELADO POR EL CLIENTE</span><span style="font-size:11px;font-weight:700;color:#aaa">#'+nroC+'</span></div>'
+        +'<div class="pedido-cliente">'+clienteC+'</div>'
+        +'<div style="font-size:12px;color:#888;margin-top:4px">'+itemsC+'</div>'
+        +'<div style="font-size:12px;color:#E24B4A;margin-top:8px;font-weight:600">'+(p.motivo_cancelacion||'El cliente canceló el pedido')+'</div>'
+        +'<button class="btn-accion" style="background:#f5f5f5;color:#555;margin-top:10px" onclick="ocultarCancelado(\''+p.id+'\')">Entendido, ocultar</button>'
+        +'</div></div>'
+    }
     var items = (p.items||[]).map(function(i){ return i.qty+'× '+i.nombre }).join(' · ')
     var hora = new Date(p.created_at).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit',timeZone:'America/Argentina/Buenos_Aires'})
     var nroPedido = p.id.substring(0,8).toUpperCase()
@@ -1514,6 +1541,12 @@ async function confirmarRechazo(){
     var ped = await sb.from('pedidos').select('cliente_id').eq('id',pedidoId).single()
     if(ped.data) enviarNotificacion(ped.data.cliente_id, '❌ Pedido rechazado', motivo)
   }
+  cargarPedidos()
+}
+
+async function ocultarCancelado(pedidoId){
+  // Marca el aviso como visto cambiando cancelado_por para que no vuelva a aparecer
+  await sb.from('pedidos').update({ cancelado_por: 'cliente_visto' }).eq('id', pedidoId)
   cargarPedidos()
 }
 
