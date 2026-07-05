@@ -1904,46 +1904,36 @@ function filtrarHistorial(){
 function renderHistorial(){
   var lista = document.getElementById('lista-historial')
   var busqueda = (document.getElementById('hist-buscador').value||'').toLowerCase().trim()
-
   var datos = historialData.filter(function(p){
     if(!busqueda) return true
     var nombre = (p.perfiles && p.perfiles.nombre) ? p.perfiles.nombre.toLowerCase() : ''
     var tel = (p.perfiles && p.perfiles.telefono) ? p.perfiles.telefono : ''
     return nombre.includes(busqueda) || tel.includes(busqueda)
   })
-
-  // Stats
   var entregados = datos.filter(function(p){ return p.estado === 'entregado' })
   var clientesUnicos = new Set(datos.map(function(p){ return p.cliente_id })).size
   var totalIngresos = entregados.reduce(function(s,p){ return s+(p.total||0) }, 0)
-
   document.getElementById('hstat-total').textContent = datos.length
   document.getElementById('hstat-clientes').textContent = clientesUnicos
   document.getElementById('hstat-ingresos').textContent = totalIngresos>=1000 ? '$'+Math.round(totalIngresos/1000)+'k' : '$'+Math.round(totalIngresos)
-
-  if(!datos.length){
-    lista.innerHTML = '<div class="loading-text">'+(busqueda?'Sin resultados para "'+busqueda+'"':'Sin pedidos en este período')+'</div>'
-    return
-  }
-
+  if(!datos.length){ lista.innerHTML = '<div class="loading-text">'+(busqueda ? 'Sin resultados' : 'Sin pedidos en este período')+'</div>'; return }
   var tagColor = {entregado:'#2D6A2D', cancelado:'#aaa', nuevo:'#FF4D00', preparando:'#B8860B', en_camino:'#1565C0'}
-  var tagLabel = {nuevo:'Nuevo', preparando:'Preparando', en_camino:'En camino', listo:'Listo', entregado:'✅ Entregado', cancelado:'❌ Cancelado'}
-
-  lista.innerHTML = datos.map(function(p){
-    var clienteNombre = (p.perfiles && p.perfiles.nombre) ? p.perfiles.nombre : 'Sin nombre'
-    var clienteTel = (p.perfiles && p.perfiles.telefono) ? p.perfiles.telefono : ''
+  var tagLabel = {nuevo:'Nuevo', preparando:'Preparando', en_camino:'En camino', listo:'Listo', entregado:'Entregado ✅', cancelado:'Cancelado ❌'}
+  var cards = []
+  datos.forEach(function(p){
+    var cNombre = (p.perfiles && p.perfiles.nombre) ? p.perfiles.nombre : 'Sin nombre'
+    var cTel = (p.perfiles && p.perfiles.telefono) ? p.perfiles.telefono : ''
     var fecha = new Date(p.created_at).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'America/Argentina/Buenos_Aires'})
-    var items = (p.items||[]).map(function(i){ return i.qty+'× '+i.nombre }).join(' · ')
+    var items = (p.items||[]).map(function(i){ return i.qty+'x '+i.nombre }).join(' · ')
     var nro = p.id.substring(0,8).toUpperCase()
     var color = tagColor[p.estado] || '#888'
     var label = tagLabel[p.estado] || p.estado
-
-    return '<div class="hist-pedido-card" onclick="abrirHistorialCliente(''+p.cliente_id+'',''+escQ(clienteNombre)+'')">'
-      +'<div class="hist-pedido-head">'
-      +'<div><div class="hist-pedido-cliente">'+clienteNombre+'</div>'
-      +(clienteTel?'<div style="font-size:11px;color:#aaa">📞 '+clienteTel+'</div>':'')
-      +'</div>'
-      +'<div style="text-align:right">'
+    var div = document.createElement('div')
+    div.className = 'hist-pedido-card'
+    div.innerHTML = '<div class="hist-pedido-head">'
+      +'<div><div class="hist-pedido-cliente">'+cNombre+'</div>'
+      +(cTel ? '<div style="font-size:11px;color:#aaa">&#128222; '+cTel+'</div>' : '')
+      +'</div><div style="text-align:right">'
       +'<div style="font-size:13px;font-weight:700;color:#FF4D00">$'+Number(p.total).toLocaleString('es-AR')+'</div>'
       +'<div class="hist-pedido-fecha">'+fecha+'</div>'
       +'</div></div>'
@@ -1951,62 +1941,70 @@ function renderHistorial(){
       +'<div class="hist-pedido-footer">'
       +'<span style="font-size:11px;color:#aaa">#'+nro+'</span>'
       +'<span style="font-size:11px;font-weight:700;color:'+color+'">'+label+'</span>'
-      +'</div></div>'
-  }).join('')
+      +'</div>'
+    var cId = p.cliente_id, cN = cNombre
+    div.addEventListener('click', function(){ abrirHistorialCliente(cId, cN) })
+    cards.push(div)
+  })
+  lista.innerHTML = ''
+  cards.forEach(function(c){ lista.appendChild(c) })
 }
 
 async function abrirHistorialCliente(clienteId, nombre){
   document.getElementById('modal-hist-titulo').textContent = '👤 '+nombre
   document.getElementById('modal-hist-body').innerHTML = '<div class="loading-text">Cargando...</div>'
   abrirModal('modal-historial-cliente')
-
-  var r = await sb.from('pedidos')
-    .select('*')
-    .eq('restaurante_id', restauranteId)
-    .eq('cliente_id', clienteId)
-    .order('created_at', {ascending: false})
-
+  var r = await sb.from('pedidos').select('*').eq('restaurante_id', restauranteId).eq('cliente_id', clienteId).order('created_at', {ascending: false})
   var pedidos = r.data || []
   var entregados = pedidos.filter(function(p){ return p.estado === 'entregado' })
   var totalGastado = entregados.reduce(function(s,p){ return s+(p.total||0) }, 0)
   var primerPedido = pedidos.length ? new Date(pedidos[pedidos.length-1].created_at).toLocaleDateString('es-AR',{timeZone:'America/Argentina/Buenos_Aires'}) : '–'
-
   var tagLabel = {nuevo:'Nuevo', preparando:'Preparando', en_camino:'En camino', listo:'Listo', entregado:'✅ Entregado', cancelado:'❌ Cancelado'}
   var tagColor = {entregado:'#2D6A2D', cancelado:'#aaa', nuevo:'#FF4D00', preparando:'#B8860B', en_camino:'#1565C0'}
-
-  var html = ''
-  html += '<div class="hist-cliente-stats">'
-  html += '<div class="hist-cliente-stat"><div class="hist-cliente-stat-val">'+pedidos.length+'</div><div class="hist-cliente-stat-label">Pedidos</div></div>'
-  html += '<div class="hist-cliente-stat"><div class="hist-cliente-stat-val">'+entregados.length+'</div><div class="hist-cliente-stat-label">Entregados</div></div>'
-  html += '<div class="hist-cliente-stat"><div class="hist-cliente-stat-val">'+(totalGastado>=1000?'$'+Math.round(totalGastado/1000)+'k':'$'+Math.round(totalGastado))+'</div><div class="hist-cliente-stat-label">Total gastado</div></div>'
-  html += '</div>'
-  html += '<div style="font-size:11px;color:#aaa;margin-bottom:14px">Cliente desde '+primerPedido+'</div>'
-  html += '<div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Pedidos</div>'
-
+  var body = document.getElementById('modal-hist-body')
+  body.innerHTML = ''
+  // Stats
+  var statsDiv = document.createElement('div')
+  statsDiv.className = 'hist-cliente-stats'
+  statsDiv.innerHTML = '<div class="hist-cliente-stat"><div class="hist-cliente-stat-val">'+pedidos.length+'</div><div class="hist-cliente-stat-label">Pedidos</div></div>'
+    +'<div class="hist-cliente-stat"><div class="hist-cliente-stat-val">'+entregados.length+'</div><div class="hist-cliente-stat-label">Entregados</div></div>'
+    +'<div class="hist-cliente-stat"><div class="hist-cliente-stat-val">'+(totalGastado>=1000?'$'+Math.round(totalGastado/1000)+'k':'$'+Math.round(totalGastado))+'</div><div class="hist-cliente-stat-label">Total gastado</div></div>'
+  body.appendChild(statsDiv)
+  var sinceDiv = document.createElement('div')
+  sinceDiv.style.cssText = 'font-size:11px;color:#aaa;margin-bottom:14px'
+  sinceDiv.textContent = 'Cliente desde ' + primerPedido
+  body.appendChild(sinceDiv)
+  var tituloDiv = document.createElement('div')
+  tituloDiv.style.cssText = 'font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px'
+  tituloDiv.textContent = 'Pedidos'
+  body.appendChild(tituloDiv)
   if(!pedidos.length){
-    html += '<div class="loading-text">Sin pedidos</div>'
+    var empty = document.createElement('div'); empty.className='loading-text'; empty.textContent='Sin pedidos'; body.appendChild(empty)
   } else {
     pedidos.forEach(function(p){
       var fecha = new Date(p.created_at).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'America/Argentina/Buenos_Aires'})
-      var items = (p.items||[]).map(function(i){ return i.qty+'× '+i.nombre }).join(', ')
+      var items = (p.items||[]).map(function(i){ return i.qty+'x '+i.nombre }).join(', ')
       var nro = p.id.substring(0,8).toUpperCase()
       var color = tagColor[p.estado] || '#888'
       var label = tagLabel[p.estado] || p.estado
-      html += '<div style="background:#fafafa;border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid #f0f0f0;cursor:pointer" onclick="cerrarModal('modal-historial-cliente');abrirDetallePedido(''+p.id+'')">'
-      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
-      html += '<span style="font-size:11px;color:#aaa">#'+nro+' · '+fecha+'</span>'
-      html += '<span style="font-size:11px;font-weight:700;color:'+color+'">'+label+'</span>'
-      html += '</div>'
-      html += '<div style="font-size:12px;color:#555;margin-bottom:6px">'+items+'</div>'
-      html += '<div style="display:flex;justify-content:space-between;font-size:12px">'
-      html += '<span style="color:#888">'+(p.tipo_entrega==='retiro'?'🛍 Retiro':'🏍 Delivery')+'</span>'
-      html += '<span style="font-weight:700;color:#FF4D00">$'+Number(p.total).toLocaleString('es-AR')+'</span>'
-      html += '</div></div>'
+      var row = document.createElement('div')
+      row.style.cssText = 'background:#fafafa;border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid #f0f0f0;cursor:pointer'
+      row.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+        +'<span style="font-size:11px;color:#aaa">#'+nro+' · '+fecha+'</span>'
+        +'<span style="font-size:11px;font-weight:700;color:'+color+'">'+label+'</span>'
+        +'</div>'
+        +'<div style="font-size:12px;color:#555;margin-bottom:6px">'+items+'</div>'
+        +'<div style="display:flex;justify-content:space-between;font-size:12px">'
+        +'<span style="color:#888">'+(p.tipo_entrega==='retiro'?'Retiro':'Delivery')+'</span>'
+        +'<span style="font-weight:700;color:#FF4D00">$'+Number(p.total).toLocaleString('es-AR')+'</span>'
+        +'</div>'
+      var pid = p.id
+      row.addEventListener('click', function(){ cerrarModal('modal-historial-cliente'); abrirDetallePedido(pid) })
+      body.appendChild(row)
     })
   }
-
-  document.getElementById('modal-hist-body').innerHTML = html
 }
+
 
 // ─── MODALES ──────────────────────────────────────────────────────────────────
 function abrirModal(id){ document.getElementById(id).classList.remove('hidden') }
