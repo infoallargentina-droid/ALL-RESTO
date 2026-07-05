@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -12,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="ALL Resto"/>
 <meta name="theme-color" content="#FF4D00"/>
 <link rel="manifest" href="manifest.json"/>
-<title>ALL — App Restaurante v2.5</title>
+<title>ALL — App Restaurante v2.6</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -211,6 +212,34 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
 .override-badge{display:inline-flex;align-items:center;gap:6px;background:#FFF0F0;border:1px solid #FFD0D0;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:#E24B4A;margin-top:8px}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:12px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:999;pointer-events:none;opacity:0;transition:.3s}
 .toast.show{opacity:1}
+/* ─── HISTORIAL ─────────────────────────────────────────────────────────── */
+.hist-search-wrap{position:relative;margin-bottom:14px}
+.hist-search{width:100%;padding:12px 16px 12px 42px;font-size:14px;border-radius:14px;border:1.5px solid #FFE8DC;background:#fff;color:#1A1A1A;outline:none}
+.hist-search:focus{border-color:#FF4D00}
+.hist-search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none}
+.hist-stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.hist-stat{background:#fff;border-radius:12px;padding:12px 8px;border:1px solid #FFE8DC;text-align:center}
+.hist-stat-val{font-size:20px;font-weight:800;color:#FF4D00}
+.hist-stat-label{font-size:10px;color:#888;margin-top:2px}
+.hist-pedido-card{background:#fff;border-radius:14px;border:1px solid #FFE8DC;margin-bottom:10px;overflow:hidden;cursor:pointer;transition:.15s}
+.hist-pedido-card:active{border-color:#FF4D00}
+.hist-pedido-head{padding:12px 14px;display:flex;align-items:center;justify-content:space-between}
+.hist-pedido-cliente{font-size:14px;font-weight:700;color:#1A1A1A}
+.hist-pedido-fecha{font-size:11px;color:#aaa;margin-top:2px}
+.hist-pedido-items{padding:6px 14px 10px;font-size:12px;color:#888;line-height:1.6;border-top:1px solid #f5f5f5}
+.hist-pedido-footer{padding:8px 14px;display:flex;align-items:center;justify-content:space-between;background:#fafafa;border-top:1px solid #f5f5f5}
+.hist-tag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px}
+.hist-tag-entregado{background:#E8F5E9;color:#2D6A2D}
+.hist-tag-cancelado{background:#f5f5f5;color:#aaa}
+.hist-filtros{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.hist-filtros::-webkit-scrollbar{display:none}
+.hist-filtro{padding:6px 14px;border-radius:20px;border:1.5px solid #eee;background:#fff;font-size:12px;font-weight:600;color:#888;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.hist-filtro.active{background:#FF4D00;color:#fff;border-color:#FF4D00}
+.hist-cliente-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:14px 0}
+.hist-cliente-stat{background:#FFF4EF;border-radius:12px;padding:10px 6px;text-align:center}
+.hist-cliente-stat-val{font-size:18px;font-weight:800;color:#FF4D00}
+.hist-cliente-stat-label{font-size:10px;color:#888;margin-top:2px}
+
 
 /* NOTIFICACIÓN NUEVO PEDIDO */
 #notif-nuevo-pedido{
@@ -261,7 +290,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
   <div class="restos-body">
     <div class="restos-label">Nuestros restaurantes</div>
     <div id="lista-restos"><div class="loading-text">Cargando restaurantes...</div></div>
-    <div class="version">ALL App Restaurante v2.4</div>
+    <div class="version">ALL App Restaurante v2.6</div>
   </div>
 </div>
 
@@ -292,7 +321,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     <div class="topbar-logo" id="topbar-logo-wrap">🍽</div>
     <div>
       <div class="topbar-name" id="rest-nombre">Restaurante</div>
-      <div class="topbar-sub">Panel del local · v2.5</div>
+      <div class="topbar-sub">Panel del local · v2.6</div>
     </div>
     <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px">
       <div class="estado-badge">
@@ -305,6 +334,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
   <div class="tabs">
     <div class="tab active" onclick="switchTab('pedidos',this)">Pedidos</div>
     <div class="tab" onclick="switchTab('menu',this)">Menú</div>
+    <div class="tab" onclick="switchTab('historial',this)">Historial</div>
     <div class="tab" onclick="switchTab('local',this)">Mi local</div>
   </div>
 
@@ -353,6 +383,28 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
         <div id="org-cats-msg" style="font-size:11px;color:#2D6A2D;margin-top:8px;text-align:center;display:none">✓ Orden guardado</div>
       </div>
     </div>
+  </div>
+
+
+  <!-- TAB HISTORIAL -->
+  <div id="tab-historial" class="scroll hidden">
+    <div class="hist-search-wrap">
+      <span class="hist-search-icon">🔍</span>
+      <input type="text" id="hist-buscador" class="hist-search" placeholder="Buscar cliente por nombre o teléfono..." oninput="filtrarHistorial()"/>
+    </div>
+    <div class="hist-filtros">
+      <div class="hist-filtro active" onclick="setFiltroHist('todos',this)">Todos</div>
+      <div class="hist-filtro" onclick="setFiltroHist('hoy',this)">Hoy</div>
+      <div class="hist-filtro" onclick="setFiltroHist('semana',this)">Esta semana</div>
+      <div class="hist-filtro" onclick="setFiltroHist('mes',this)">Este mes</div>
+    </div>
+    <div class="hist-stats-row">
+      <div class="hist-stat"><div class="hist-stat-val" id="hstat-total">0</div><div class="hist-stat-label">Pedidos</div></div>
+      <div class="hist-stat"><div class="hist-stat-val" id="hstat-clientes">0</div><div class="hist-stat-label">Clientes</div></div>
+      <div class="hist-stat"><div class="hist-stat-val" id="hstat-ingresos">$0</div><div class="hist-stat-label">Total</div></div>
+    </div>
+    <div class="section-title">Pedidos</div>
+    <div id="lista-historial"><div class="loading-text">Cargando historial...</div></div>
   </div>
 
   <!-- TAB LOCAL -->
@@ -458,7 +510,18 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#1A1A1A}
     </div>
 
     <button class="btn-main btn-dark" style="margin-top:6px" onclick="cerrarSesion()">Cerrar sesión</button>
-    <div class="version">ALL App Restaurante v2.4</div>
+    <div class="version">ALL App Restaurante v2.6</div>
+  </div>
+</div>
+
+<!-- MODAL HISTORIAL CLIENTE -->
+<div id="modal-historial-cliente" class="modal-bg hidden" onclick="cerrarModalBg(event,'modal-historial-cliente')">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modal-hist-titulo">Historial del cliente</span>
+      <span class="modal-close" onclick="cerrarModal('modal-historial-cliente')">✕</span>
+    </div>
+    <div id="modal-hist-body"></div>
   </div>
 </div>
 
@@ -782,12 +845,13 @@ async function cerrarSesion(){
 function switchTab(tab,el){
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active') })
   el.classList.add('active')
-  ;['pedidos','menu','local'].forEach(function(t){
+  ;['pedidos','menu','historial','local'].forEach(function(t){
     document.getElementById('tab-'+t).classList[t===tab?'remove':'add']('hidden')
   })
   if(tab==='menu') cargarMenu()
   if(tab==='local'){ cargarLogoLocal(); cargarCategorias(); cargarRaspadita(); cargarHorarios(); cargarModalidades(); cargarAliasTransferencia() }
   if(tab==='pedidos') iniciarPollingPedidos()
+  if(tab==='historial') cargarHistorial()
 }
 
 // ─── LOGO ─────────────────────────────────────────────────────────────────────
@@ -1791,6 +1855,157 @@ async function guardarRaspadita(){
   msg.style.display='block'
   setTimeout(function(){ msg.style.display='none' },2000)
   await cargarRaspadita()
+}
+
+
+// ─── HISTORIAL ────────────────────────────────────────────────────────────────
+var historialData = []
+var historialFiltro = 'todos'
+
+async function cargarHistorial(){
+  if(!restauranteId) return
+  var lista = document.getElementById('lista-historial')
+  lista.innerHTML = '<div class="loading-text">Cargando...</div>'
+
+  var ahora = new Date()
+  var query = sb.from('pedidos')
+    .select('*,perfiles(nombre,telefono)')
+    .eq('restaurante_id', restauranteId)
+    .order('created_at', {ascending: false})
+    .limit(500)
+
+  if(historialFiltro === 'hoy'){
+    var hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate()).toISOString()
+    query = query.gte('created_at', hoy)
+  } else if(historialFiltro === 'semana'){
+    var semana = new Date(ahora - 7*24*60*60*1000).toISOString()
+    query = query.gte('created_at', semana)
+  } else if(historialFiltro === 'mes'){
+    var mes = new Date(ahora.getFullYear(), ahora.getMonth(), 1).toISOString()
+    query = query.gte('created_at', mes)
+  }
+
+  var r = await query
+  historialData = r.data || []
+  renderHistorial()
+}
+
+function setFiltroHist(filtro, el){
+  historialFiltro = filtro
+  document.querySelectorAll('.hist-filtro').forEach(function(f){ f.classList.remove('active') })
+  el.classList.add('active')
+  cargarHistorial()
+}
+
+function filtrarHistorial(){
+  renderHistorial()
+}
+
+function renderHistorial(){
+  var lista = document.getElementById('lista-historial')
+  var busqueda = (document.getElementById('hist-buscador').value||'').toLowerCase().trim()
+
+  var datos = historialData.filter(function(p){
+    if(!busqueda) return true
+    var nombre = (p.perfiles && p.perfiles.nombre) ? p.perfiles.nombre.toLowerCase() : ''
+    var tel = (p.perfiles && p.perfiles.telefono) ? p.perfiles.telefono : ''
+    return nombre.includes(busqueda) || tel.includes(busqueda)
+  })
+
+  // Stats
+  var entregados = datos.filter(function(p){ return p.estado === 'entregado' })
+  var clientesUnicos = new Set(datos.map(function(p){ return p.cliente_id })).size
+  var totalIngresos = entregados.reduce(function(s,p){ return s+(p.total||0) }, 0)
+
+  document.getElementById('hstat-total').textContent = datos.length
+  document.getElementById('hstat-clientes').textContent = clientesUnicos
+  document.getElementById('hstat-ingresos').textContent = totalIngresos>=1000 ? '$'+Math.round(totalIngresos/1000)+'k' : '$'+Math.round(totalIngresos)
+
+  if(!datos.length){
+    lista.innerHTML = '<div class="loading-text">'+(busqueda?'Sin resultados para "'+busqueda+'"':'Sin pedidos en este período')+'</div>'
+    return
+  }
+
+  var tagColor = {entregado:'#2D6A2D', cancelado:'#aaa', nuevo:'#FF4D00', preparando:'#B8860B', en_camino:'#1565C0'}
+  var tagLabel = {nuevo:'Nuevo', preparando:'Preparando', en_camino:'En camino', listo:'Listo', entregado:'✅ Entregado', cancelado:'❌ Cancelado'}
+
+  lista.innerHTML = datos.map(function(p){
+    var clienteNombre = (p.perfiles && p.perfiles.nombre) ? p.perfiles.nombre : 'Sin nombre'
+    var clienteTel = (p.perfiles && p.perfiles.telefono) ? p.perfiles.telefono : ''
+    var fecha = new Date(p.created_at).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'America/Argentina/Buenos_Aires'})
+    var items = (p.items||[]).map(function(i){ return i.qty+'× '+i.nombre }).join(' · ')
+    var nro = p.id.substring(0,8).toUpperCase()
+    var color = tagColor[p.estado] || '#888'
+    var label = tagLabel[p.estado] || p.estado
+
+    return '<div class="hist-pedido-card" onclick="abrirHistorialCliente(''+p.cliente_id+'',''+escQ(clienteNombre)+'')">'
+      +'<div class="hist-pedido-head">'
+      +'<div><div class="hist-pedido-cliente">'+clienteNombre+'</div>'
+      +(clienteTel?'<div style="font-size:11px;color:#aaa">📞 '+clienteTel+'</div>':'')
+      +'</div>'
+      +'<div style="text-align:right">'
+      +'<div style="font-size:13px;font-weight:700;color:#FF4D00">$'+Number(p.total).toLocaleString('es-AR')+'</div>'
+      +'<div class="hist-pedido-fecha">'+fecha+'</div>'
+      +'</div></div>'
+      +'<div class="hist-pedido-items">'+items+'</div>'
+      +'<div class="hist-pedido-footer">'
+      +'<span style="font-size:11px;color:#aaa">#'+nro+'</span>'
+      +'<span style="font-size:11px;font-weight:700;color:'+color+'">'+label+'</span>'
+      +'</div></div>'
+  }).join('')
+}
+
+async function abrirHistorialCliente(clienteId, nombre){
+  document.getElementById('modal-hist-titulo').textContent = '👤 '+nombre
+  document.getElementById('modal-hist-body').innerHTML = '<div class="loading-text">Cargando...</div>'
+  abrirModal('modal-historial-cliente')
+
+  var r = await sb.from('pedidos')
+    .select('*')
+    .eq('restaurante_id', restauranteId)
+    .eq('cliente_id', clienteId)
+    .order('created_at', {ascending: false})
+
+  var pedidos = r.data || []
+  var entregados = pedidos.filter(function(p){ return p.estado === 'entregado' })
+  var totalGastado = entregados.reduce(function(s,p){ return s+(p.total||0) }, 0)
+  var primerPedido = pedidos.length ? new Date(pedidos[pedidos.length-1].created_at).toLocaleDateString('es-AR',{timeZone:'America/Argentina/Buenos_Aires'}) : '–'
+
+  var tagLabel = {nuevo:'Nuevo', preparando:'Preparando', en_camino:'En camino', listo:'Listo', entregado:'✅ Entregado', cancelado:'❌ Cancelado'}
+  var tagColor = {entregado:'#2D6A2D', cancelado:'#aaa', nuevo:'#FF4D00', preparando:'#B8860B', en_camino:'#1565C0'}
+
+  var html = ''
+  html += '<div class="hist-cliente-stats">'
+  html += '<div class="hist-cliente-stat"><div class="hist-cliente-stat-val">'+pedidos.length+'</div><div class="hist-cliente-stat-label">Pedidos</div></div>'
+  html += '<div class="hist-cliente-stat"><div class="hist-cliente-stat-val">'+entregados.length+'</div><div class="hist-cliente-stat-label">Entregados</div></div>'
+  html += '<div class="hist-cliente-stat"><div class="hist-cliente-stat-val">'+(totalGastado>=1000?'$'+Math.round(totalGastado/1000)+'k':'$'+Math.round(totalGastado))+'</div><div class="hist-cliente-stat-label">Total gastado</div></div>'
+  html += '</div>'
+  html += '<div style="font-size:11px;color:#aaa;margin-bottom:14px">Cliente desde '+primerPedido+'</div>'
+  html += '<div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Pedidos</div>'
+
+  if(!pedidos.length){
+    html += '<div class="loading-text">Sin pedidos</div>'
+  } else {
+    pedidos.forEach(function(p){
+      var fecha = new Date(p.created_at).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'America/Argentina/Buenos_Aires'})
+      var items = (p.items||[]).map(function(i){ return i.qty+'× '+i.nombre }).join(', ')
+      var nro = p.id.substring(0,8).toUpperCase()
+      var color = tagColor[p.estado] || '#888'
+      var label = tagLabel[p.estado] || p.estado
+      html += '<div style="background:#fafafa;border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid #f0f0f0;cursor:pointer" onclick="cerrarModal('modal-historial-cliente');abrirDetallePedido(''+p.id+'')">'
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+      html += '<span style="font-size:11px;color:#aaa">#'+nro+' · '+fecha+'</span>'
+      html += '<span style="font-size:11px;font-weight:700;color:'+color+'">'+label+'</span>'
+      html += '</div>'
+      html += '<div style="font-size:12px;color:#555;margin-bottom:6px">'+items+'</div>'
+      html += '<div style="display:flex;justify-content:space-between;font-size:12px">'
+      html += '<span style="color:#888">'+(p.tipo_entrega==='retiro'?'🛍 Retiro':'🏍 Delivery')+'</span>'
+      html += '<span style="font-weight:700;color:#FF4D00">$'+Number(p.total).toLocaleString('es-AR')+'</span>'
+      html += '</div></div>'
+    })
+  }
+
+  document.getElementById('modal-hist-body').innerHTML = html
 }
 
 // ─── MODALES ──────────────────────────────────────────────────────────────────
